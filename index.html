@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+  <head>
+
+    <!-- General Head Content -->
+    
+    <!-- meta tags -->
+    
+    <meta charset="utf-8" />
+    
+    <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1' /><![endif]-->
+
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+    <!-- stylesheet -->
+    
+    <link rel="stylesheet" type="text/css" href="login.css" />
+
+  </head>
+  
+  <body>
+
+    <!-- App here. -->
+    <div class="container" id="app">
+      
+      <main>
+        <header class="left">
+          <section class="logo">
+	          <img src="logo.jpg" />
+	        </section>
+          <div class="content">
+            Rabi.PL.DB
+          </div>
+        </header>
+	      
+
+
+
+	      <section class="body">
+
+          <section class="form">
+            <div class="form-row">
+              <div class="form-row-icon">
+                <label for="hostport" class="label">
+                  <div class="pl pl-circle pl-color pl-size-small"></div>
+                </label>
+              </div>
+              <div class="form-row-content">
+                <input id="hostport" name="hostport" type="text"
+                       class="field"
+                       placeholder="HOST : PORT" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-row-icon">
+                <label for="userpass" class="label">
+                  <div class="pl pl-circle pl-color-2nd pl-size-small"></div>
+                </label>
+              </div>
+              <div class="form-row-content">
+                <input id="userpass" name="userpass" type="text"
+                       class="field"
+                       placeholder="USER : PASS" />
+              </div>
+            </div>
+          </section>
+
+	      </section>
+
+
+        
+        <footer class="footer">
+          <div class="icon-block" id="info">
+            <div class="icon-block-icon">
+              <div class="pl pl-circle pl-size-small" id="state"></div>
+            </div>
+            <div class="icon-block-content" id="message">
+              Type C-c to Connect Server
+            </div>
+          </div>
+        </footer>
+
+	      
+      </main>
+
+
+      <section class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-main">
+          <header class="modal-header">
+            <div class="icon-block modal-close">
+              <div class="icon-block-icon">
+                <div class="pl pl-circle pl-color-failure" id="modal-close"></div>
+              </div>
+              <div class="icon-block-content">
+                /(ㄒoㄒ)/~~
+              </div>
+            </div>
+          </header>
+          <main class="modal-body">
+            <p>
+              Access denied for user 'root'@'localhost
+            </p>
+          </main>
+        </div>
+      </section>
+      
+    </div>
+
+
+    <script>
+      ;(function() {
+        
+        function $$(id) {
+          return document.getElementById(id);
+        }
+        
+        function onChangeHandle($elem) {
+          return function() {
+            var $row = $elem.parentElement.parentElement;
+
+            if($elem.value.trim() === '') {
+              $row.classList.remove('active');
+            } else {
+              $row.classList.add('active');
+            }
+          }
+        }
+
+        var $hostport = $$('hostport');
+        var $userpass = $$('userpass');
+        
+        $hostport.addEventListener('keyup', onChangeHandle($hostport), false);
+        $userpass.addEventListener('keyup', onChangeHandle($userpass), false);
+
+
+        
+        var $state   = $$('state');
+        var $message = $$('message');
+        var $info    = $$('info');
+        var timer = null;
+
+        function toggleStateClass(state) {
+          $state.classList.remove('pl-color');
+          $state.classList.remove('pl-color-success');
+          $state.classList.remove('pl-color-failure');
+          $state.classList.add('pl-color-' + state);
+        } 
+
+        function connect(evt) {
+          if(!((evt.composed && evt.ctrlKey && evt.which === 67)
+            || evt.which === 13)) return;
+          
+
+          if($hostport.value.trim() === '') {
+            $hostport.focus();
+            return;
+          }
+
+          if($userpass.value.trim() === '') {
+            $userpass.focus();
+            return;
+          }
+
+
+          toggleStateClass('success');
+          $message.innerText = 'Connecting ...';
+
+          var random = Math.floor(Math.random() * 2);
+
+          clearTimeout(timer);
+          timer = setTimeout((random ? connectSuccess : connectFailure), 2000);
+
+          return;
+        }
+
+        function connectSuccess() {
+          toggleStateClass('success');
+          $message.innerText = 'Succeed!';
+        }
+
+        function connectFailure() {
+          toggleStateClass('failure');
+          //$message.innerText = 'Connected Failed';
+          $message.innerText = 'Access denied for user \'root\'@\'localhost\'';
+
+          $info.addEventListener('click', modalOpen, false);
+        }
+
+        function modalOpen() {
+
+        }
+
+        function modalClose() {
+          
+        }
+        
+        document.addEventListener('keydown', connect, false);
+      })();
+
+      ;(function() {
+        
+      })();
+    </script>
+    
+  </body>
+  
+</html>
