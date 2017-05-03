@@ -5,15 +5,15 @@ node_js:
 cache:
   yarn: true  
 
-
 env:
   - NODE_ENV=development
 
-  
+before_install:
+  - npm install -g yarn
+
 install:
   - cd frontend
   - yarn install
-
 
 script:
   - yarn test
