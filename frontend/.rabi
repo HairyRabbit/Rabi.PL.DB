@@ -1,0 +1,24 @@
+[default]
+
+mode = frontend
+framework = redux
+builder = webpack
+typed = flowtype
+lang = es6
+
+
+[webpack]
+
+host = 127.0.0.1
+port = 2333
+
+
+[api]
+
+version = v1
+baseurl = api
+
+
+[redux]
+
+dirstrcture = pods 

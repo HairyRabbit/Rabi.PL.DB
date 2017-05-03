@@ -1,0 +1,10 @@
+[*.{xml,html}]
+indent_size = 2
+
+
+[{*.json,.babelrc, travis.yml}]
+indent_size = 2
+
+
+[.rabi]
+indent_size = 4

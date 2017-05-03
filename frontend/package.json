@@ -7,8 +7,10 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest",
-    "typed": "flow"
+    "test": "cross-env ./node_modules/.bin/jest",
+    "typed": "cross-env ./node_modules/.bin/flow",
+    "lint": "cross-env ./node_modules/.bin/eslint src",
+    "test:all": "yarn test && yarn typed && yarn lint"
   },
   "repository": {
     "type": "git",
@@ -28,10 +30,14 @@
   "homepage": "https://github.com/yuffiy/Rabi.PL.DB#readme",
   "devDependencies": {
     "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
     "babel-jest": "^19.0.0",
     "babel-preset-env": "^1.4.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
+    "eslint": "^3.19.0",
+    "eslint-plugin-flowtype": "^2.32.1",
+    "eslint-plugin-react": "^6.10.3",
     "flow-bin": "^0.45.0",
     "isomorphic-fetch": "^2.2.1",
     "jest": "^19.0.2",
