@@ -3,17 +3,22 @@ node_js:
   - "7"
 
 cache:
-  yarn: true  
+  yarn: true
+  flow-typed: true
 
 env:
   - NODE_ENV=development
 
 before_install:
   - npm install -g yarn
+  - npm install -g flow-typed
 
 install:
   - cd frontend
   - yarn install
+  - flow-typed install
+  
 
 script:
   - yarn test
+  - yarn typed

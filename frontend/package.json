@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "typed": "flow"
   },
   "repository": {
     "type": "git",
