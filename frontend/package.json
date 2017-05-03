@@ -10,7 +10,7 @@
     "test": "cross-env ./node_modules/.bin/jest",
     "typed": "cross-env ./node_modules/.bin/flow",
     "lint": "cross-env ./node_modules/.bin/eslint src",
-    "test:all": "yarn test && yarn typed && yarn lint"
+    "check:all": "yarn test && yarn typed && yarn lint"
   },
   "repository": {
     "type": "git",

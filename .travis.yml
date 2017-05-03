@@ -5,6 +5,7 @@ node_js:
 cache:
   yarn: true
   flow-typed: true
+  cross-env: true
 
 env:
   - NODE_ENV=development
@@ -12,13 +13,12 @@ env:
 before_install:
   - npm install -g yarn
   - npm install -g flow-typed
+  - npm install -g cross-env
 
 install:
   - cd frontend
   - yarn install
   - flow-typed install
   
-
 script:
-  - yarn test
-  - yarn typed
+  - yarn check:all
