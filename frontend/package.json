@@ -1,0 +1,47 @@
+{
+  "name": "rabistyle",
+  "version": "0.1.0",
+  "description": "Rabi And PL Database Client",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuffiy/Rabi.PL.DB.git"
+  },
+  "keywords": [
+    "rabi",
+    "pl",
+    "database",
+    "mysql"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yuffiy/Rabi.PL.DB/issues"
+  },
+  "homepage": "https://github.com/yuffiy/Rabi.PL.DB#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-jest": "^19.0.0",
+    "babel-preset-env": "^1.4.0",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-react": "^6.24.1",
+    "flow-bin": "^0.45.0",
+    "isomorphic-fetch": "^2.2.1",
+    "jest": "^19.0.2",
+    "nock": "^9.0.13",
+    "redux-mock-store": "^1.2.3"
+  },
+  "jest": {
+    "verbose": true
+  },
+  "dependencies": {
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0"
+  }
+}

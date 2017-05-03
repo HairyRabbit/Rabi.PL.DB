@@ -1,0 +1,11 @@
+[ignore]
+.*/__tests__/.*
+.*\.test\.js
+.*\.spec\.js
+<PROJECT_ROOT>/node_modules/.*
+
+[include]
+
+[libs]
+
+[options]
