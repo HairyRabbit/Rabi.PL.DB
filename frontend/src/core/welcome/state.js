@@ -3,7 +3,7 @@
 // @flow
 
 
-import { compose } from 'redux'
+import { bindActionCreators } from 'redux'
 
 import {
   Connect,
@@ -14,6 +14,7 @@ import {
 import type {
   Model,
   Action,
+  ConnectError,
   ConnectObject,
   ConnectAction,
   ConnectSuccessAction,
@@ -102,19 +103,30 @@ export function update(model: Model = initModel, action: ?Action): Model  {
 export function connect(conn: ConnectObject): ThunkAction<Action> {
   return dispatch => {
     
-    dispatch({ type: Connect })
+    const boundConnectRequest = bindActionCreators(connectRequest, dispatch)
+    const boundConnectSuccess = bindActionCreators(connectSuccess, dispatch)
+    const boundConnectFailure = bindActionCreators(connectFailure, dispatch)
 
-    const composedConnectSuccess = compose(dispatch, connectSuccess)
-    const composedConnectFailure = compose(dispatch, connectFailure)
+    return Promise.resolve()
+      .then(boundConnectRequest)
+      .then(() => {
+        return fetch('http://localhost/api/v1/connect', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(conn)
+        })
+      })
+      .then(response => response.json())
+      .then(boundConnectSuccess, boundConnectFailure)
+  }
+}
 
-    return fetch('http://localhost/api/v1/connect', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(conn)
-    }).then(response => response.json())
-      .then(composedConnectSuccess, composedConnectFailure)
+
+function connectRequest(): ConnectAction {
+  return {
+    type: Connect
   }
 }
 
@@ -127,7 +139,7 @@ function connectSuccess(): ConnectSuccessAction {
 }
 
 
-function connectFailure(error): ConnectFailureAction {
+function connectFailure(error: ConnectError): ConnectFailureAction {
   return {
     type: ConnectFailure,
     payload: {
