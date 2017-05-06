@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "WIP",
   "main": "index.js",
-    "scripts": {
-        "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/yuffiy/Rabi.PL.DB/issues"
   },
-  "homepage": "https://github.com/yuffiy/Rabi.PL.DB#readme"
+  "homepage": "https://github.com/yuffiy/Rabi.PL.DB#readme",
+  "devDependencies": {
+    "jest": "^19.0.2"
+  }
 }
