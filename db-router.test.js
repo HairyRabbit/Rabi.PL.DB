@@ -1,4 +1,4 @@
-let impl = require('./db-router-impl.js')
+let impl = require('./db-router-impl')
 
 
 test('hello Promise', done => {
