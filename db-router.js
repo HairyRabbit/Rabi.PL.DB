@@ -21,7 +21,6 @@ router.get('/connect', function (req, res) {
         let connection_token = jsonwebtoken.sign(payload, key)
         global_connection_dict[connection_token] = connection
         res.json({token: connection_token})
-        console.log(connection)
     }).catch((err) => {
         console.log(err)
         res.json({err})

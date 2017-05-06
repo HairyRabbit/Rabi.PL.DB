@@ -11,7 +11,7 @@ test('hello Promise', done => {
 test('connect mysql good', done => {
     impl.connect(
         '127.0.0.1', '3306',
-        'root', 'root',
+        'root', '',
         'mysql', 'TODO'
     ).then(connection => {
         expect(connection).toBeDefined()
