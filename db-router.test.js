@@ -49,7 +49,7 @@ test('test helloj', () => {
 })
 
 
-let auth_headers
+let headers
 
 
 beforeAll(() => {
@@ -61,15 +61,26 @@ beforeAll(() => {
     }
 
     dbr.handle({url: '/connect', query, method: 'GET'}, {json (v) {
-        auth_headers = {authorization: 'Bearer ' + v.token}
+        headers = {authorization: 'Bearer ' + v.token}
         expect(v.token).toBeDefined()
     }})
 })
 
 afterAll(() => {
-    dbr.handle({url: '/end', method: 'GET', headers: auth_headers}, {end () {
+    dbr.handle({url: '/end', method: 'GET', headers}, {end () {
         expect(1).toBeDefined()
     }})
 })
 
+test('dbr databases', () => {
+    dbr.handle({method: 'GET', url: '/database', headers}, {json (v) {
+        expect(v.rows).toContainEqual({'Database': 'mysql'})
+    }})
+})
+
+test('dbr tables', () => {
+    dbr.handle({method: 'GET', url: '/table', headers}, {json (v) {
+        expect(v.rows).toContainEqual({'Tables_in_mysql': 'user'})
+    }})
+})
 

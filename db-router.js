@@ -23,10 +23,10 @@ router.get('/connect', function (req, res) {
         host, port, user, pass, database, ssl
     ).then((connection) => {
         let payload = {
-            r: Math.random()
+            k: '' + Math.random()
         }
+        global_connection_dict[payload.k] = connection
         let connection_token = jsonwebtoken.sign(payload, key)
-        global_connection_dict[connection_token] = connection
         res.json({token: connection_token})
     }).catch((err) => {
         console.log(err)
@@ -35,13 +35,34 @@ router.get('/connect', function (req, res) {
 })
 
 router.get('/end', (req, res) => {
-    let connection_token = req.user.token
-    let connection = global_connection_dict[connection_token]
+    let connection_key = req.user.k
+    let connection = global_connection_dict[connection_key]
     connection.end()
-    delete global_connection_dict[connection_token]
+    delete global_connection_dict[connection_key]
     res.end()
 })
 
+router.get('/database', (req, res) => {
+    let connection = global_connection_dict[req.user.k]
+    connection.query('show databases', (err, rows, fields) => {
+        if (err) {
+            res.json({err})
+        } else {
+            res.json({fields, rows})
+        }
+    })
+})
+
+router.get('/table', (req, res) => {
+    let connection = global_connection_dict[req.user.k]
+    connection.query('show tables', (err, rows, fields) => {
+        if (err) {
+            res.json({err})
+        } else {
+            res.json({fields, rows})
+        }
+    })
+})
 
 
 module.exports = router
