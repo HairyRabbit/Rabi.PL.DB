@@ -10,7 +10,6 @@
 
 import path from 'path'
 import dllFileOrDir from '../dll-file-or-dir'
-
 import { DllPlugin, DllReferencePlugin } from 'webpack'
 
 type DllEntry = {
@@ -51,10 +50,24 @@ export default function dllOptions(
   }
 }
 
+/**
+ * dllScriptPath
+ *
+ * Runtime dll file path.
+ *
+ * @sig string -> string
+ */
 export function dllScriptPath(name: string): string {
   return `dll/${name}.js`
 }
 
+/**
+ * dllRefPlugin
+ *
+ * Find dll libs.
+ *
+ * @sig (string, string) -> DllReferencePlugin 
+ */
 export function dllRefPlugin(
   distPath: string,
   name: string
