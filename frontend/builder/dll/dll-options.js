@@ -22,6 +22,8 @@ type DllOutput = {
   library: '[name]'
 }
 
+export type Dll = 'vendor' | 'hmr'
+
 export type DllOptions = {
   entry: DllEntry,
   output: DllOutput,

@@ -8,13 +8,12 @@
  * Build
  */
 
-import webpack from 'webpack'
-import makeDll from './dll/dll'
-import makeApp from './app-dev'
-import type { Dll } from './dll/dll'
+import makeDll from './dll'
+import makeApp from './app'
+import type { Dll } from './dll/dll-options'
+import type { Env } from './app'
 
 type Task = 'dll' | 'app'
-type Env = 'development' | 'production'
 
 type Options = {
   task: Task,

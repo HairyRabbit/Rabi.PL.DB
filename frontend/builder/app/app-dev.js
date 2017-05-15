@@ -5,47 +5,22 @@
 /**
  * app-dev
  *
- * Build App on development mode.
+ * [WIP] Build App on development mode.
  */
 
 import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import template from 'html-webpack-template'
-import findConfigs from './find-configs'
-import foldConfigs from './fold-configs'
-import { dllScriptPath, dllRefPlugin } from './dll/dll-options'
+import findConfigs from './../find-configs'
+import foldConfigs from './../fold-configs'
+import { dllScriptPath, dllRefPlugin } from './../dll/dll-options'
+import type { WebpackOptions } from './../webpack-options'
 import { NamedModulesPlugin, DefinePlugin, EnvironmentPlugin } from 'webpack'
 
 const distPath: string = path.resolve(__dirname, 'dist')
 const srcPath: string = path.resolve(__dirname, 'src')
 const configPath: string = path.resolve(__dirname, 'config')
 const dllPath: string = path.resolve(distPath, 'dll')
-
-type WebpackOptions = {
-  entry: {
-    [string]: Array<string>
-  },
-  output: {
-    path: string,
-    filename: '[name].js',
-    chunkFilename: '[id].[name].js',
-    publicPath: '/'
-  },
-  module: {
-    rules: Array<{
-      test: RegExp,
-      use: Array<string> | string
-    }>
-  },
-  devServer: {
-    host: string,
-    port: number,
-    contentBase: string,
-    publicPath: '/',
-    hot: boolean
-  },
-  plugins: Array<any>
-}
 
 function webpackOptions(config): WebpackOptions {
   return {

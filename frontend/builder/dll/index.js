@@ -9,13 +9,11 @@
  */
 
 import path from 'path'
-import type { DllOptions } from './dll-options'
+import type { DllOptions, Dll } from './dll-options'
 import vendorDll from './dll-vendor'
 import hmrDll from './dll-hmr'
 
 type DllTask = DllOptions | Array<DllOptions>
-
-export type Dll = 'vendor' | 'hmr'
 
 export default function makeDll(task?: Dll): DllTask {
   const distPath: string = path.resolve(__dirname, 'dist')
