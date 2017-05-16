@@ -10,7 +10,7 @@
 
 import buildDev from './app-dev'
 import buildProd from './app-prod'
-import type { WebpackOptions } from './../webpack-options'
+import type { WebpackOptions } from './webpack-options'
 
 export type Env = 'development' | 'production'
 

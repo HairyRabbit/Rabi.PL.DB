@@ -17,7 +17,8 @@ import ChunkManifestPlugin from 'chunk-manifest-webpack-plugin'
 import WebpackChunkHash from 'webpack-chunk-hash'
 import findConfigs from './../find-configs'
 import foldConfigs from './../fold-configs'
-import type { WebpackOptions } from './../webpack-options'
+import type { WebpackOptions } from './webpack-options'
+import excludeDeps from './../exclude-deps'
 import {
   HashedModuleIdsPlugin,
   optimize as WebpackOptimize,
@@ -32,7 +33,17 @@ const distPath: string = path.resolve(__dirname, 'dist')
 const srcPath: string = path.resolve(__dirname, 'src')
 const configPath: string = path.resolve(__dirname, 'config')
 
-function webpackOptions(config): WebpackOptions {
+function webpackOptions(config: Object): WebpackOptions {
+  const { libs, umd } = config
+
+  const externals: { [string]: string } = libs.reduce((acc, curr) => {
+    const [libName, _, libUmdName] = curr
+    acc[libName] = umd.special[libName] || libUmdName
+    return acc
+  }, {})
+
+  const libsCdn = libs.map(lib => `//unpkg.com/${lib[1]}`)
+
   return {
     entry: {
       app: path.resolve(srcPath, 'boot.js')
@@ -56,6 +67,7 @@ function webpackOptions(config): WebpackOptions {
         }
       ]
     },
+    externals: externals,
     plugins: [
       // Generate html page
       new HtmlWebpackPlugin({
@@ -63,7 +75,8 @@ function webpackOptions(config): WebpackOptions {
         template: template,
         mobile: true,
         inject: false,
-        appMountId: 'app'
+        appMountId: 'app',
+        scripts: libsCdn
       }),
 
       // Generate stylesheet
@@ -88,9 +101,17 @@ function webpackOptions(config): WebpackOptions {
   }
 }
 
+function mergeDeps(config) {
+  return excludeDeps().then(libs => {
+    config.libs = libs
+    return config
+  })
+}
+
 export default function makeApp() {
   return findConfigs(configPath)
     .then(foldConfigs)
+    .then(mergeDeps)
     .then(webpackOptions)
     .catch(err => {
       throw new Error(err)

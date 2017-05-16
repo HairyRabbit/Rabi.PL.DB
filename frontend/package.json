@@ -1,7 +1,7 @@
 {
   "name": "rabistyle",
   "version": "0.1.0",
-  "description": "Rabi And PL Database Client",
+  "description": "Rabi && PL Database Client",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -10,7 +10,19 @@
     "test": "cross-env ./node_modules/.bin/jest",
     "typed": "cross-env ./node_modules/.bin/flow",
     "lint": "cross-env ./node_modules/.bin/eslint src",
-    "check:all": "yarn test && yarn typed && yarn lint"
+    "check:all": "yarn test && yarn typed && yarn lint",
+    "precommit": "lint-staged",
+    "storybook": "start-storybook -p 6006",
+    "build:storybook": "build-storybook",
+    "build:builder": "rm *webpack.config.js -f && cross-env ./node_modules/.bin/webpack builder/make.js --output-filename=webpack.config.js --output-library=webpackConfig --output-library-target=commonjs2 --target=node --module-bind=js=babel-loader --plugin=./builder/node-externals-plugin.js",
+    "build:dll:vendor": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --env.task=dll --env.dll=vendor",
+    "build:dll:hmr": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --env.task=dll --env.dll=hmr",
+    "build:dll": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --env.task=dll",
+    "build:dev": "cross-env NODE_ENV=development ./node_modules/.bin/webpack-dev-server --hot -d --env.task=app --env.env=development",
+    "build:prod": "cross-env NODE_ENV=production ./node_modules/.bin/webpack -p --env.task=app --env.env=production",
+    "start:init": "yarn build:builder && yarn build:dll && yarn start",
+    "start": "yarn build:dev",
+    "build": "yarn build:prod"
   },
   "repository": {
     "type": "git",
@@ -29,26 +41,57 @@
   },
   "homepage": "https://github.com/yuffiy/Rabi.PL.DB#readme",
   "devDependencies": {
+    "@kadira/storybook": "^2.21.0",
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-jest": "^19.0.0",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-preset-env": "^1.4.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
+    "chunk-manifest-webpack-plugin": "^1.1.0",
+    "css-loader": "^0.28.1",
     "eslint": "^3.19.0",
     "eslint-plugin-flowtype": "^2.32.1",
     "eslint-plugin-react": "^6.10.3",
+    "extract-text-webpack-plugin": "^2.1.0",
     "flow-bin": "^0.45.0",
+    "getstorybook": "^1.7.0",
+    "glob": "^7.1.1",
+    "html-webpack-plugin": "https://github.com/yuffiy/html-webpack-plugin.git",
+    "html-webpack-template": "^6.0.1",
+    "husky": "^0.13.3",
     "isomorphic-fetch": "^2.2.1",
     "jest": "^19.0.2",
+    "lint-staged": "^3.4.1",
     "nock": "^9.0.13",
-    "redux-mock-store": "^1.2.3"
+    "postcss-loader": "^2.0.5",
+    "prettier": "^1.3.1",
+    "react-hot-loader": "next",
+    "redux-mock-store": "^1.2.3",
+    "style-loader": "^0.17.0",
+    "webpack": "^2.5.0",
+    "webpack-chunk-hash": "^0.4.0",
+    "webpack-dev-server": "^2.4.5",
+    "webpack-manifest-plugin": "^1.1.0",
+    "webpack-node-externals": "^1.5.4",
+    "worker-loader": "^0.8.0"
   },
   "jest": {
     "verbose": true
   },
   "dependencies": {
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-redux": "^5.0.4",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write --no-semi --single-quote --parser=flow",
+      "git add"
+    ],
+    "gitDir": "../"
   }
 }

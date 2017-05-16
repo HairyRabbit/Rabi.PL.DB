@@ -38,3 +38,7 @@ jspm_packages
 
 # Flowtype
 flow-bin
+flow-typed
+
+# Webpack Config
+webpack.config.js

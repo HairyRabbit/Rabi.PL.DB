@@ -24,6 +24,7 @@ export type WebpackOptions = {
       use: any
     }>
   },
+  externals?: any,
   devServer?: {
     host: string,
     port: number,

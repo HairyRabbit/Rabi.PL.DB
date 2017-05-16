@@ -14,7 +14,7 @@ import template from 'html-webpack-template'
 import findConfigs from './../find-configs'
 import foldConfigs from './../fold-configs'
 import { dllScriptPath, dllRefPlugin } from './../dll/dll-options'
-import type { WebpackOptions } from './../webpack-options'
+import type { WebpackOptions } from './webpack-options'
 import { NamedModulesPlugin, DefinePlugin, EnvironmentPlugin } from 'webpack'
 
 const distPath: string = path.resolve(__dirname, 'dist')
