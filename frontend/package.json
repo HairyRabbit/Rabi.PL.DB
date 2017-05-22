@@ -49,6 +49,8 @@
     "babel-preset-env": "^1.4.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "cache-loader": "^1.0.3",
     "chunk-manifest-webpack-plugin": "^1.1.0",
     "css-loader": "^0.28.1",
     "eslint": "^3.19.0",
@@ -70,6 +72,7 @@
     "react-hot-loader": "next",
     "redux-mock-store": "^1.2.3",
     "style-loader": "^0.17.0",
+    "thread-loader": "^1.0.1",
     "webpack": "^2.5.0",
     "webpack-chunk-hash": "^0.4.0",
     "webpack-dev-server": "^2.4.5",
@@ -81,9 +84,14 @@
     "verbose": true
   },
   "dependencies": {
+    "history": "^4.6.1",
+    "lodash": "^4.17.4",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-redux": "^5.0.4",
+    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
+    "react-router-redux": "next",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0"
   },

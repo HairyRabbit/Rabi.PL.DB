@@ -5,10 +5,21 @@
 
 
 
-** Build vendor dll
+** 为什么使用 DLL ？
+
+  构建 DLL 可以加速 webpack 打包，提高 build 性能。
+
+  一个本项目(基于 react/redux/react-router/react-redux)的打包对比：
+
+  +BEGIN_SRC javascript
+  
+  -END_SRC
+  
+
+
+
+
+
+** 将第三方依赖构建为 Webpack DLL 包
 
    
-   
-
-
-

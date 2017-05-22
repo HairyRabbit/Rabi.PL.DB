@@ -1,5 +1,11 @@
 {
-  "special": {
-    "react-dom": "ReactDOM"
+  "react-dom": {
+    "name": "ReactDOM"
+  },
+  "react-router-dom": {
+    "name": "ReactRouterDOM"
+  },
+  "react-router-redux": {
+    "url": "react-router-redux@5.0.0-alpha.6/umd/react-router-redux.js"
   }
 }

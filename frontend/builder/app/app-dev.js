@@ -35,7 +35,10 @@ function webpackOptions(config): WebpackOptions {
     },
     module: {
       rules: [
-        { test: /\.js$/, use: 'babel-loader' },
+        {
+          test: /\.js$/,
+          use: ['cache-loader', 'thread-loader?workers=2', 'babel-loader']
+        },
         {
           test: /\.css$/,
           use: [

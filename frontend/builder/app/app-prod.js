@@ -35,14 +35,13 @@ const configPath: string = path.resolve(__dirname, 'config')
 
 function webpackOptions(config: Object): WebpackOptions {
   const { libs, umd } = config
+  const externals: { [string]: string } = libs.reduce(foldExternals(umd), {})
 
-  const externals: { [string]: string } = libs.reduce((acc, curr) => {
-    const [libName, _, libUmdName] = curr
-    acc[libName] = umd.special[libName] || libUmdName
-    return acc
-  }, {})
-
-  const libsCdn = libs.map(lib => `//unpkg.com/${lib[1]}`)
+  // Use unpkg CDN load libs
+  const libsCdn: Array<string> = libs.map(([libName, filePath]) => {
+    const url = (umd[libName] && umd[libName].url) || filePath
+    return `//unpkg.com/${url}`
+  })
 
   return {
     entry: {
@@ -101,14 +100,22 @@ function webpackOptions(config: Object): WebpackOptions {
   }
 }
 
-function mergeDeps(config) {
+function mergeDeps(config: Object): Promise<Object> {
   return excludeDeps().then(libs => {
     config.libs = libs
     return config
   })
 }
 
-export default function makeApp() {
+function foldExternals(umd: Object): Function {
+  return (acc: Object, curr: [string, any, string]): { [string]: string } => {
+    const [libName, _, libUmdName] = curr
+    acc[libName] = (umd[libName] && umd[libName].name) || libUmdName
+    return acc
+  }
+}
+
+export default function makeApp(): Promise<*> {
   return findConfigs(configPath)
     .then(foldConfigs)
     .then(mergeDeps)

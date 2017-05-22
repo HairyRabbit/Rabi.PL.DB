@@ -33,7 +33,7 @@ export default function excludeDeps(): Promise<Array<LibTuple>> {
     function mapper(filepathTuple: MiniFilepathTuple): LibTuple {
       const [libname: Libname] = filepathTuple
       const libUmdName: LibUmdName = replacer(/^(\w)/)(
-        replacer(/-(\w)/)(libname)
+        replacer(/-(\w)/g)(libname)
       )
       return [...filepathTuple, libUmdName]
     }
