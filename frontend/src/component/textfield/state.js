@@ -7,7 +7,7 @@
  */
 
 import { Change } from './types'
-import type { Model, Action, onChangeAction } from './types'
+import type { Model, Action, OnChangeAction } from './types'
 
 /// Update
 
@@ -24,6 +24,11 @@ export function update(model: Model = initModel, action: ?Action): Model {
         value: action.payload
       })
 
+    case ClearInput:
+      return Object.assign({}, model, {
+        value: ''
+      })
+
     default:
       return model
   }
@@ -31,9 +36,15 @@ export function update(model: Model = initModel, action: ?Action): Model {
 
 /// Action
 
-export function onChange(value: string): onChangeAction {
+export function onChange(value: string): OnChangeAction {
   return {
     type: Change,
     payload: value
+  }
+}
+
+export function clearInput(): ClearInputAction {
+  return {
+    type: ClearInput
   }
 }
