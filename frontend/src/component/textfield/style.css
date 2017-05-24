@@ -5,6 +5,27 @@
  * textfield/style
  */
 
+@value left-width: 2rem;
+
+.container {
+  position: relative;
+}
+
+.left {
+  composes: flex-center from 'style/flex-center.css';
+  composes: position-fill-left from 'style/position-fill-left.css';
+  width: left-width;
+}
+
+.circle {
+  display: inline-block;
+  size: 1.2rem;
+  border-radius: 50%;
+  background: var(--gray1);
+}
+
 .main {
-  border-bottom: 1px solid #ddd;
+  box-sizing: border-box;
+  padding: 0.5rem 1rem;
+  padding-left: 2.5rem;
 }

@@ -6,33 +6,49 @@ import React from 'react'
 import { connect } from 'react-redux'
 import style from './style.css'
 import type { Type } from './types'
-import { clearInput } from './state'
 
 type Prop = {
   name: string,
   type: Type,
   value: string,
-  onChange: Function
+  onChange: Function,
+  onKeyDown?: Function
 }
 
 export function TextField(props: Prop): React.Element<*> {
-  const { name, type, value, dispatch, onChange, clearInput, onKeyDown } = props
+  const { name, type, value, onChange, onKeyDown } = props
+
+  const boundOnChange = onChange(type)
 
   return (
     <div className={style.container}>
+      <div className={style.left}>
+        <div className={style.circle} />
+      </div>
       <input
         value={value}
-        type={type}
+        type="text"
         id={name}
         name={name}
-        onChange={onChange}
+        onChange={boundOnChange}
         onKeyDown={evt => {
-          // C-l
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`KeyCode: ${evt.which}`)
+          }
+
+          // C-l build-in
           if (evt.ctrlKey && evt.which === 76) {
             evt.preventDefault()
-            console.log(0)
-            clearInput && clearInput()
-            onKeyDown && onKeyDown()
+            boundOnChange(makeValue(''))
+          }
+
+          // SPC
+          // if(typeof autoFill === 'function' && evt.which === 32) {
+          //   autoFill()
+          // }
+
+          if (typeof onKeyDown === 'function') {
+            onKeyDown()
           }
         }}
         className={style.main}
@@ -42,3 +58,7 @@ export function TextField(props: Prop): React.Element<*> {
 }
 
 export default TextField
+
+function makeValue(value: string): { target: { value: string } } {
+  return { target: { value: value } }
+}

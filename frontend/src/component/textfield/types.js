@@ -14,6 +14,7 @@
 export type Type =
   | 'text'
   | 'password'
+  | 'number'
   | 'tel'
   | 'mail'
   | 'datetime'
@@ -28,18 +29,13 @@ export type Type =
 
 // textfiled value change
 export const Change: 'Change' = 'Change'
-export const ClearClearInput: 'ClearInput' = 'ClearInput'
 
 export type OnChangeAction = {
   type: typeof Change,
-  payload: string
+  payload: ?string
 }
 
-export type ClearInputAction = {
-  type: typeof ClearInput
-}
-
-export type Action = OnChangeAction | ClearInputAction
+export type Action = OnChangeAction
 
 /// Model
 
