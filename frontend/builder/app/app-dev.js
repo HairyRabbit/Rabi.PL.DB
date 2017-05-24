@@ -21,6 +21,11 @@ const distPath: string = path.resolve(__dirname, 'dist')
 const srcPath: string = path.resolve(__dirname, 'src')
 const configPath: string = path.resolve(__dirname, 'config')
 const dllPath: string = path.resolve(distPath, 'dll')
+const libPath: string = path.resolve(srcPath, 'lib')
+const libStylePath: string = path.resolve(libPath, 'styles')
+const viewPath: string = path.resolve(srcPath, 'view')
+const componentPath: string = path.resolve(srcPath, 'component')
+const corePath: string = path.resolve(srcPath, 'core')
 
 function webpackOptions(config): WebpackOptions {
   return {
@@ -37,7 +42,7 @@ function webpackOptions(config): WebpackOptions {
       rules: [
         {
           test: /\.js$/,
-          use: ['cache-loader', 'thread-loader?workers=2', 'babel-loader']
+          use: ['cache-loader', 'thread-loader?workers=4', 'babel-loader']
         },
         {
           test: /\.css$/,
@@ -48,6 +53,15 @@ function webpackOptions(config): WebpackOptions {
           ]
         }
       ]
+    },
+    resolve: {
+      alias: {
+        lib: libPath,
+        style: libStylePath,
+        view: viewPath,
+        component: componentPath,
+        core: corePath
+      }
     },
     devServer: {
       host: config.server.host,

@@ -1,3 +1,8 @@
 {
-  "presets": [["env", { "modules": false }], "react", "flow", 'stage-2']
+  "presets": [["env", { "modules": false }], "react", "flow", 'stage-2'],
+  "env": {
+    "test": {
+      "presets": ["env", "react", "flow", 'stage-2']
+    }
+  }
 }
