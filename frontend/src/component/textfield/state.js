@@ -6,29 +6,69 @@
  * textfield/state
  */
 
-import { Change } from './types'
-import type { Model, Action, Type, OnChangeAction } from './types'
+import eq from 'lodash/eq'
 import ipv4 from 'lib/is-ipv4'
+import {
+  Change,
+  PushToAutoCompleteList,
+  RemoveAutoCompleteItem,
+  ActiveAutoCompleteItem
+} from './types'
+import type {
+  Model,
+  Action,
+  Type,
+  OnChangeAction,
+  PushToAutoCompleteListAction,
+  RemoveAutoCompleteItemAction,
+  ActiveAutoCompleteItemAction
+} from './types'
 
 /// Update
 
-export const initModel: Model = {
-  value: ''
+export const initModel: Model<*> = {
+  value: '',
+  autocompleted: false,
+  autocompletelist: [],
+  autocompletes: []
 }
 
-export function update(model: Model = initModel, action: ?Action): Model {
+export function update<T>(
+  model: Model<T> = initModel,
+  action: ?Action<T>
+): Model<T> {
   if (!action) return model
 
   switch (action.type) {
     case Change: {
-      if (action.payload === null) return model
+      const acs = model.autocompletes
+      const value = action.payload
       return Object.assign({}, model, {
-        value: action.payload
+        value: value,
+        autocompletelist: model.autocompleted === false
+          ? acs
+          : acs
+              .filter(n => {
+                const regex = new RegExp(`^${value}`)
+                return n.match(regex)
+              })
+              .sort()
       })
     }
 
-    default:
+    case PushToAutoCompleteList: {
+      if (model.autocompleted === false) return model
+      const { autocompletes: acs, autocompletelist: acl, value: item } = model
+      if (acs.find(n => eq(n, item))) return model
+      return Object.assign({}, model, {
+        autocompletes: [...acs, item],
+        autocompletelist: [...acl, item]
+      })
+    }
+
+    default: {
       return model
+    }
   }
 }
 
@@ -37,15 +77,10 @@ export function update(model: Model = initModel, action: ?Action): Model {
 export function onChange(value: string, type: Type): OnChangeAction {
   switch (type) {
     case 'ipv4': {
-      if (!ipv4(value)) {
-        return {
-          type: Change,
-          payload: null
-        }
-      }
+      // Fixed backspace keypress can't delete chats.
       return {
         type: Change,
-        payload: value
+        payload: value.slice(-1) === '.' ? value : encodeIpv4(value)
       }
     }
 
@@ -55,4 +90,20 @@ export function onChange(value: string, type: Type): OnChangeAction {
         payload: value
       }
   }
+}
+
+export function pushac<T>(): PushToAutoCompleteListAction<T> {
+  return {
+    type: PushToAutoCompleteList
+  }
+}
+
+/// Helper
+
+function encodeIpv4(str: string): string {
+  return decodeIpv4(str).join(' . ')
+}
+
+function decodeIpv4(str: string): string {
+  return str.split('.').map(n => n.trim())
 }
