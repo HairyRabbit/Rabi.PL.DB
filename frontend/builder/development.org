@@ -4,9 +4,60 @@
 
 
 
-** folder structure
+** Project && Folder structure
+
+*** Folder structure introduction 文件目录结构及说明
+
+   #+BEGIN_SRC
+   
+   source/
+     |- lib/
+       |- styles/
+         |- global/
+           |- [GlobalResetFile].css
+           |- theme.css
+         |- [Utils].css
+       |- __tests__/
+         |- [UtilsTest].js
+       |- [Utils].js
+
+     |- component/
+       |- [ComponentName]/
+         |- __tests__/
+           |- status.js
+           |- index.js
+         |- index.js
+         |- style.css
+         |- view/
+           |- [SubComponentName]/
+             |- index.js
+             |- style.css
+         |- types.js
+         |- state.js
+         |- README.org
+
+     |- core/
+       |- [ModuleName]/
+         |- __tests__/
+           |- status.js
+         |- types.js
+         |- state.js
+       |- index.js
+
+     |- view/
+       |- [PageName]/
+         |- __tests__/
+           |- index.js
+         |- index.js
+         |- style.css
+       |- index.js
+   
+   #+END_SRC
+
 
 
    
-
+** Configure Alias
   
+
+*** Webpack 别名系统
