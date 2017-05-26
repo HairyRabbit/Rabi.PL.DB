@@ -33,6 +33,8 @@ export const initModel: Model<*> = {
   autocompleted: false,
   autocompletelist: [],
   autocompletes: [],
+  autocompleteTransform: JSON.stringify,
+  autocompleteParser: n => n,
   autocompletePushOnBlur: false,
   autocompleteHighLight: false,
   autocompleteShadow: false
@@ -55,10 +57,12 @@ export function update<T>(
           : acs
               .filter(n => {
                 // TODO replaced space to any
+                // TODO n is not a string
                 //const val = value.replace(/\s/g, '\\\.')
                 const val = value
                 const regex = new RegExp(`^${val}`)
-                return n.match(regex)
+                if (typeof n === 'string') return n.match(regex)
+                return model.autocompleteTransform(n).match(regex)
               })
               .sort()
       })
@@ -69,8 +73,8 @@ export function update<T>(
       const { autocompletes: acs, autocompletelist: acl, value: item } = model
       if (acs.find(n => eq(n, item))) return model
       return Object.assign({}, model, {
-        autocompletes: [...acs, item],
-        autocompletelist: [...acl, item]
+        autocompletes: [...acs, model.autocompleteParser.Parser(item)],
+        autocompletelist: [...acl, model.autocompleteParser.Parser(item)]
       })
     }
 

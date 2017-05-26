@@ -43,7 +43,7 @@ export function TextField(props: Prop): React.Element<*> {
 
   const boundOnChange = onChange(type)
 
-  const ShadowComponent: React.Element<*> = () =>
+  const ShadowComponent: () => ?React.Element<*> = () =>
     autocompleted &&
       autocompleteShadow &&
       autocompletelist &&
@@ -51,11 +51,11 @@ export function TextField(props: Prop): React.Element<*> {
       ? <Shadow>{autocompletelist[0]}</Shadow>
       : null
 
-  const AutoCompleteComponent: React.Element<*> = () =>
+  const AutoCompleteComponent: <T>() => ?React.Element<*> = () =>
     autocompleted
       ? <AutoComplete
-          component={autocompleteItem}
-          highlight={autocompleteHighLight}
+          render={autocompleteItem}
+          highlight={Boolean(autocompleteHighLight)}
           value={value}
         >
           {autocompletelist}

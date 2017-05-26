@@ -6,7 +6,7 @@ import React from 'react'
 import style from './style.css'
 
 type Prop = {
-  children: string
+  children?: string
 }
 
 function Shadow(props: Prop): React.Element<*> {

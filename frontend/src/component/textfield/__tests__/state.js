@@ -1,6 +1,7 @@
 import configureMockStore from 'redux-mock-store'
 import { Change } from '../types'
 import { initModel, update, onChange } from '../state'
+import ipv4 from 'lib/is-ipv4'
 
 /// Update
 

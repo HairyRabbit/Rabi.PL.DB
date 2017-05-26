@@ -66,6 +66,8 @@ export type Model<T> = {
   autocompleted: boolean,
   autocompletelist: Array<T>,
   autocompletes: Array<T>,
+  autocompleteTransform: T => string,
+  autocompleteParser: any => T,
   autocompletePushOnBlur: boolean,
   autocompleteHighLight: boolean,
   autocompleteShadow: boolean

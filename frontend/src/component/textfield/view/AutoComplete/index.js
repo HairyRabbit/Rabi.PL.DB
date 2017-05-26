@@ -8,24 +8,32 @@ import HighLight from '../HighLight'
 
 type Prop<T> = {
   children?: Array<T>,
-  render: React.Element<*>,
-  value: T,
-  highlight: boolean
+  render?: ?React.Element<*>,
+  value: string,
+  highlight: boolean,
+  transformer?: T => string
+}
+
+function DefaultRender({ children }) {
+  return <div>{children}</div>
 }
 
 function AutoComplete<T>(props: Prop<T>): React.Element<*> {
-  const { children, render, value, highlight } = props
+  const { children, render, value, highlight, transformer } = props
+  const component = render || DefaultRender
   return (
     <div className={style.container}>
       <ul className={style.list}>
         {children
           ? children.map((item, idx) => (
               <li key={idx}>
-                <render>
+                <component>
                   {highlight
-                    ? <HighLight target={value}>{item}</HighLight>
+                    ? <HighLight target={value} transformer={transformer}>
+                        {item}
+                      </HighLight>
                     : item}
-                </render>
+                </component>
               </li>
             ))
           : null}
