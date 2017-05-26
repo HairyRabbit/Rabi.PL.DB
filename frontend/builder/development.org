@@ -7,51 +7,53 @@
 ** Project && Folder structure
 
 *** Folder structure introduction 文件目录结构及说明
-
-   #+BEGIN_SRC
-   
-   source/
-     |- lib/
-       |- styles/
-         |- global/
+    
+    #+BEGIN_SRC
+   source/                               # 项目源码
+     |- lib/                             # 工具或帮助函数
+       |- styles/                        # 工具样式
+         |- global/                      # 全局样式
            |- [GlobalResetFile].css
-           |- theme.css
-         |- [Utils].css
-       |- __tests__/
+           |- index.css                  # 全局重置样式
+           |- theme.css                  # :root 全局变量
+         |- [Utils].css                  # 工具样式库
+       |- __tests__/                     # 工具函数测试
          |- [UtilsTest].js
-       |- [Utils].js
+       |- [Utils].js                     # 工具函数
 
-     |- component/
+     |- component/                       # 组件
        |- [ComponentName]/
-         |- __tests__/
-           |- status.js
-           |- index.js
-         |- index.js
-         |- style.css
-         |- view/
+         |- __tests__/                   # 组件测试
+           |- status.js                  
+           |- index.js                   
+         |- index.js                     # React组件
+         |- style.css                    # 组件样式
+         |- view/                        # 子组件
            |- [SubComponentName]/
              |- index.js
              |- style.css
-         |- types.js
-         |- state.js
-         |- README.org
+         |- types.js                     # 组件Action与Model类型定义
+         |- state.js                     # 组件状态与Action
+         |- README.org                   # 说明文件
 
-     |- core/
+     |- core/                            # 逻辑核心
        |- [ModuleName]/
-         |- __tests__/
+         |- __tests__/                   # 逻辑测试
            |- status.js
-         |- types.js
-         |- state.js
-       |- index.js
+         |- types.js                     # Action与Model类型定义
+         |- state.js                     # Update/InitModel/Action状态定义
+       |- index.js                       # 全局store
 
-     |- view/
+     |- view/                            # React视图层
        |- [PageName]/
-         |- __tests__/
+         |- __tests__/                   # 视图测试
            |- index.js
-         |- index.js
-         |- style.css
-       |- index.js
+         |- index.js                     # 主容器视图定义
+         |- style.css                    # 视图组件样式
+       |- index.js                       # 路由定义
    
+     |- index.js                         # 组合视图与逻辑
+     |- boot.js                          # 开发/产品环境启动配置
    #+END_SRC
 
 
