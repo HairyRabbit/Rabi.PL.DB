@@ -1,0 +1,6 @@
+.container {
+  composes: position-fill from 'style/position-fill.css';
+  composes: main from '../../style.css';
+  z-index: -1;
+  color: var(--gray2); 
+}

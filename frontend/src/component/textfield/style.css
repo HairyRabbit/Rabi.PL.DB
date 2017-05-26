@@ -29,15 +29,3 @@
   padding: 0.5rem 1rem;
   padding-left: 2.5rem;
 }
-
-
-/* AutoComplete layer */
-
-.bottom {
-  composes: position-fill from 'style/position-fill.css';
-  top: 100%;
-}
-
-.list {
-  composes: list-reset from 'style/list-reset.css';
-}

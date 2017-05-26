@@ -61,7 +61,12 @@ export type Action<T> =
 
 export type Model<T> = {
   value: string,
+  type: Type,
+  name: string,
   autocompleted: boolean,
   autocompletelist: Array<T>,
-  autocompletes: Array<T>
+  autocompletes: Array<T>,
+  autocompletePushOnBlur: boolean,
+  autocompleteHighLight: boolean,
+  autocompleteShadow: boolean
 }

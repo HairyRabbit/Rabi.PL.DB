@@ -1,0 +1,11 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+.container {
+  composes: position-fill from 'style/position-fill.css';
+  top: 100%;
+}
+
+.list {
+  composes: list-reset from 'style/list-reset.css';
+}

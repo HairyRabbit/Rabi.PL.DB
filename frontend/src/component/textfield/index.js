@@ -3,9 +3,10 @@
 // @flow
 
 import React from 'react'
-import { connect } from 'react-redux'
 import style from './style.css'
 import type { Type } from './types'
+import Shadow from './view/Shadow'
+import AutoComplete from './view/AutoComplete'
 
 type Prop = {
   name: string,
@@ -15,9 +16,12 @@ type Prop = {
   onKeyDown?: Function,
   onBlur?: Function,
   autocompleted?: boolean,
-  autocompleteList?: Array<any>,
+  autocompletelist?: Array<any>,
   autocompleteItem?: React.Element<*>,
-  pushToAutoComplete?: Function
+  autocompletePushOnBlur?: boolean,
+  pushToAutoComplete?: Function,
+  autocompleteHighLight?: boolean,
+  autocompleteShadow?: boolean
 }
 
 export function TextField(props: Prop): React.Element<*> {
@@ -29,27 +33,53 @@ export function TextField(props: Prop): React.Element<*> {
     onKeyDown,
     onBlur,
     autocompleted,
-    autocompleteList,
+    autocompletelist,
     autocompleteItem,
-    pushToAutoComplete
+    autocompletePushOnBlur,
+    pushToAutoComplete,
+    autocompleteHighLight,
+    autocompleteShadow
   } = props
 
   const boundOnChange = onChange(type)
 
+  const ShadowComponent: React.Element<*> = () =>
+    autocompleted &&
+      autocompleteShadow &&
+      autocompletelist &&
+      autocompletelist.length !== 0
+      ? <Shadow>{autocompletelist[0]}</Shadow>
+      : null
+
+  const AutoCompleteComponent: React.Element<*> = () =>
+    autocompleted
+      ? <AutoComplete
+          component={autocompleteItem}
+          highlight={autocompleteHighLight}
+          value={value}
+        >
+          {autocompletelist}
+        </AutoComplete>
+      : null
+
   return (
     <div className={style.container}>
       <Icon />
-      {autocompleted
-        ? <List component={autocompleteItem}>{autocompleteList}</List>
-        : null}
+      <AutoCompleteComponent />
+      <ShadowComponent />
 
       <input
         value={value}
         type="text"
         id={name}
         name={name}
+        className={style.main}
         onBlur={evt => {
-          if (autocompleted && typeof pushToAutoComplete === 'function') {
+          if (
+            autocompleted &&
+            autocompletePushOnBlur &&
+            typeof pushToAutoComplete === 'function'
+          ) {
             pushToAutoComplete()
           }
 
@@ -80,10 +110,10 @@ export function TextField(props: Prop): React.Element<*> {
           if (autocompleted && evt.which === 9) {
             evt.preventDefault()
             if (
-              Array.isArray(autocompleteList) &&
-              autocompleteList.length > 0
+              Array.isArray(autocompletelist) &&
+              autocompletelist.length > 0
             ) {
-              boundOnChange(makeValue(autocompleteList[0]))
+              boundOnChange(makeValue(autocompletelist[0]))
             }
           }
 
@@ -110,7 +140,6 @@ export function TextField(props: Prop): React.Element<*> {
             onKeyDown(evt)
           }
         }}
-        className={style.main}
       />
     </div>
   )
@@ -122,23 +151,6 @@ function Icon() {
   return (
     <div className={style.left}>
       <div className={style.circle} />
-    </div>
-  )
-}
-
-function List(props): React.Element<*> {
-  const { children, component } = props
-  return (
-    <div className={style.bottom}>
-      <ul className={style.list}>
-        {children
-          ? children.map((item, idx) => (
-              <li key={idx}>
-                <component>{item}</component>
-              </li>
-            ))
-          : null}
-      </ul>
     </div>
   )
 }

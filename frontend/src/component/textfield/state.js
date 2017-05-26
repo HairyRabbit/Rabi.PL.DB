@@ -28,9 +28,14 @@ import type {
 
 export const initModel: Model<*> = {
   value: '',
+  type: 'text',
+  name: '',
   autocompleted: false,
   autocompletelist: [],
-  autocompletes: []
+  autocompletes: [],
+  autocompletePushOnBlur: false,
+  autocompleteHighLight: false,
+  autocompleteShadow: false
 }
 
 export function update<T>(
@@ -49,7 +54,10 @@ export function update<T>(
           ? acs
           : acs
               .filter(n => {
-                const regex = new RegExp(`^${value}`)
+                // TODO replaced space to any
+                //const val = value.replace(/\s/g, '\\\.')
+                const val = value
+                const regex = new RegExp(`^${val}`)
                 return n.match(regex)
               })
               .sort()
@@ -104,6 +112,6 @@ function encodeIpv4(str: string): string {
   return decodeIpv4(str).join(' . ')
 }
 
-function decodeIpv4(str: string): string {
+function decodeIpv4(str: string): Array<string> {
   return str.split('.').map(n => n.trim())
 }
