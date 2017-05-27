@@ -2,11 +2,8 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-/**
- * textfield/state
- */
-
 import eq from 'lodash/eq'
+import identity from 'lodash/identity'
 import ipv4 from 'lib/is-ipv4'
 import {
   Change,
@@ -18,6 +15,7 @@ import type {
   Model,
   Action,
   Type,
+  AutoComplete,
   OnChangeAction,
   PushToAutoCompleteListAction,
   RemoveAutoCompleteItemAction,
@@ -26,55 +24,92 @@ import type {
 
 /// Update
 
+export const initAutoComplete: AutoComplete<*> = {
+  list: [],
+  showList: [],
+  suggest: false,
+  autoPush: false,
+  highlight: false,
+  decode: identity,
+  encode: identity
+}
+
 export const initModel: Model<*> = {
   value: '',
   type: 'text',
   name: '',
-  autocompleted: false,
-  autocompletelist: [],
-  autocompletes: [],
-  autocompleteTransform: JSON.stringify,
-  autocompleteParser: n => n,
-  autocompletePushOnBlur: false,
-  autocompleteHighLight: false,
-  autocompleteShadow: false
+  autocomplete: null
 }
 
-export function update<T>(
-  model: Model<T> = initModel,
-  action: ?Action<T>
-): Model<T> {
+export function update<T>(model: Model<T>, action: ?Action<T>): Model<T> {
   if (!action) return model
 
   switch (action.type) {
     case Change: {
-      const acs = model.autocompletes
-      const value = action.payload
+      const value: string = action.payload
+
+      if (!model.autocomplete) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[TextField] AutoComplete was not enabled.')
+        }
+        return Object.assign({}, model, {
+          value: value
+        })
+      }
+
+      const { list, showList, decode } = model.autocomplete
+
+      if (list.length === 0) {
+        return Object.assign({}, model, {
+          value: value
+        })
+      }
+
+      function filter(item: T): boolean {
+        const regex: RegExp = new RegExp(`^${value}`)
+        if (typeof item === 'string') {
+          return Boolean(item.match(regex))
+        }
+
+        return Boolean(decode(item).match(regex))
+      }
+
       return Object.assign({}, model, {
         value: value,
-        autocompletelist: model.autocompleted === false
-          ? acs
-          : acs
-              .filter(n => {
-                // TODO replaced space to any
-                // TODO n is not a string
-                //const val = value.replace(/\s/g, '\\\.')
-                const val = value
-                const regex = new RegExp(`^${val}`)
-                if (typeof n === 'string') return n.match(regex)
-                return model.autocompleteTransform(n).match(regex)
-              })
-              .sort()
+        autocomplete: {
+          ...model.autocomplete,
+          showList: list.filter(filter).sort()
+        }
       })
     }
 
     case PushToAutoCompleteList: {
-      if (model.autocompleted === false) return model
-      const { autocompletes: acs, autocompletelist: acl, value: item } = model
-      if (acs.find(n => eq(n, item))) return model
+      if (!model.autocomplete) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[TextField] AutoComplete was not enabled.')
+        }
+        return model
+      }
+
+      const value: T = action.payload
+      const { list, showList, decode } = model.autocomplete
+
+      function filter(target: T): Function {
+        return function(item: T): Boolean {
+          return eq(decode(item), decode(target))
+        }
+      }
+
+      if (list.filter(filter(value)).length !== 0) {
+        return model
+      }
+
       return Object.assign({}, model, {
-        autocompletes: [...acs, model.autocompleteParser.Parser(item)],
-        autocompletelist: [...acl, model.autocompleteParser.Parser(item)]
+        autocomplete: {
+          ...model.autocomplete,
+          list: [...list, value],
+          showList: [...showList, value]
+        }
       })
     }
 
@@ -104,9 +139,10 @@ export function onChange(value: string, type: Type): OnChangeAction {
   }
 }
 
-export function pushac<T>(): PushToAutoCompleteListAction<T> {
+export function pushac<T>(value: T): PushToAutoCompleteListAction<T> {
   return {
-    type: PushToAutoCompleteList
+    type: PushToAutoCompleteList,
+    payload: value
   }
 }
 

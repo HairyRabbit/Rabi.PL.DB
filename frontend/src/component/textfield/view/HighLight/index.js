@@ -11,18 +11,17 @@ type Prop<T> = {
   transformer?: T => string
 }
 
-// TODO if children is not a string
 function HighLight<T>(props: Prop<T>): React.Element<*> {
   const { children, target, transformer } = props
-  if (!children) return React.Children.only(null)
-  const ctx: string = typeof children !== 'string' &&
-    transformer &&
-    typeof transformer === 'function'
-    ? transformer(children)
-    : JSON.stringify(children)
+  if (!children) return <div />
+  const ctx: string = typeof children === 'string'
+    ? children
+    : transformer && typeof transformer === 'function'
+        ? transformer(children)
+        : JSON.stringify(children)
   const idx: number = ctx.indexOf(target)
   const len: number = target.length
-  if (idx === -1) return React.Children.only(ctx)
+  if (idx === -1) return <div>{ctx}</div>
   const left: string = ctx.slice(idx, len)
   const right: string = ctx.slice(len)
   return (

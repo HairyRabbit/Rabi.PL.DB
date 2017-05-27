@@ -34,7 +34,8 @@ export type OnChangeAction = {
 export const PushToAutoCompleteList: 'PushToAutoCompleteList' =
   'PushToAutoCompleteList'
 export type PushToAutoCompleteListAction<T> = {
-  type: typeof PushToAutoCompleteList
+  type: typeof PushToAutoCompleteList,
+  payload: T
 }
 
 export const RemoveAutoCompleteItem: 'RemoveAutoCompleteItem' =
@@ -59,16 +60,19 @@ export type Action<T> =
 
 /// Model
 
+export type AutoComplete<T> = {
+  list: Array<T>,
+  showList: Array<T>,
+  suggest: boolean,
+  autoPush: boolean,
+  highlight: boolean,
+  decode: T => string,
+  encode: string => T
+}
+
 export type Model<T> = {
   value: string,
   type: Type,
   name: string,
-  autocompleted: boolean,
-  autocompletelist: Array<T>,
-  autocompletes: Array<T>,
-  autocompleteTransform: T => string,
-  autocompleteParser: any => T,
-  autocompletePushOnBlur: boolean,
-  autocompleteHighLight: boolean,
-  autocompleteShadow: boolean
+  autocomplete: ?AutoComplete<T>
 }

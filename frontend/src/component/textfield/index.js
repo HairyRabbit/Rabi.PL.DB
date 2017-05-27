@@ -4,63 +4,72 @@
 
 import React from 'react'
 import style from './style.css'
-import type { Type } from './types'
+import type { Type, AutoComplete } from './types'
 import Shadow from './view/Shadow'
-import AutoComplete from './view/AutoComplete'
+import AC from './view/AutoComplete'
 
-type Prop = {
+type Prop<T> = {
   name: string,
   type: Type,
   value: string,
+  autocomplete?: AutoComplete<T>,
+  autocompleteRender?: React.Element<*>,
+  initAutoComplete: Function,
+  pushToAutoComplete: Function,
   onChange: Function,
   onKeyDown?: Function,
   onBlur?: Function,
-  autocompleted?: boolean,
-  autocompletelist?: Array<any>,
-  autocompleteItem?: React.Element<*>,
-  autocompletePushOnBlur?: boolean,
-  pushToAutoComplete?: Function,
-  autocompleteHighLight?: boolean,
-  autocompleteShadow?: boolean
+  prop: Array<any>
 }
 
-export function TextField(props: Prop): React.Element<*> {
+export function TextField<T>(props: Prop<T>): React.Element<*> {
   const {
     name,
     type,
     value,
+    autocomplete,
+    autocompleteRender,
+    initAutoComplete,
+    pushToAutoComplete,
     onChange,
     onKeyDown,
     onBlur,
-    autocompleted,
-    autocompletelist,
-    autocompleteItem,
-    autocompletePushOnBlur,
-    pushToAutoComplete,
-    autocompleteHighLight,
-    autocompleteShadow
+    ...prop
   } = props
 
-  const boundOnChange = onChange(type)
+  const boundOnChange: Function = onChange(type)
 
-  const ShadowComponent: () => ?React.Element<*> = () =>
-    autocompleted &&
-      autocompleteShadow &&
-      autocompletelist &&
-      autocompletelist.length !== 0
-      ? <Shadow>{autocompletelist[0]}</Shadow>
-      : null
+  function ShadowComponent(): ?React.Element<*> {
+    if (!(autocomplete && autocomplete.suggest)) {
+      return null
+    }
 
-  const AutoCompleteComponent: <T>() => ?React.Element<*> = () =>
-    autocompleted
-      ? <AutoComplete
-          render={autocompleteItem}
-          highlight={Boolean(autocompleteHighLight)}
-          value={value}
-        >
-          {autocompletelist}
-        </AutoComplete>
-      : null
+    const { decode, showList } = autocomplete
+
+    if (showList.length === 0) {
+      return null
+    }
+
+    return <Shadow>{decode(showList[0])}</Shadow>
+  }
+
+  function AutoCompleteComponent<T>(): ?React.Element<*> {
+    if (!autocomplete) {
+      return null
+    }
+
+    const { highlight, showList } = autocomplete
+
+    return (
+      <AC
+        render={autocompleteRender}
+        highlight={autocomplete.highlight}
+        value={value}
+      >
+        {autocomplete.showList}
+      </AC>
+    )
+  }
 
   return (
     <div className={style.container}>
@@ -74,15 +83,19 @@ export function TextField(props: Prop): React.Element<*> {
         id={name}
         name={name}
         className={style.main}
+        {...prop}
         onBlur={evt => {
+          // Auto push on blur
           if (
-            autocompleted &&
-            autocompletePushOnBlur &&
+            autocomplete &&
+            autocomplete.autoPush &&
+            pushToAutoComplete &&
             typeof pushToAutoComplete === 'function'
           ) {
-            pushToAutoComplete()
+            pushToAutoComplete(value)
           }
 
+          // Pass to native blur
           if (typeof onBlur === 'function') {
             onBlur(evt)
           }
@@ -107,14 +120,10 @@ export function TextField(props: Prop): React.Element<*> {
           }
 
           // AutoComplete Bind `Tab` key
-          if (autocompleted && evt.which === 9) {
+          if (autocomplete && evt.which === 9) {
             evt.preventDefault()
-            if (
-              Array.isArray(autocompletelist) &&
-              autocompletelist.length > 0
-            ) {
-              boundOnChange(makeValue(autocompletelist[0]))
-            }
+            const { decode, showList } = autocomplete
+            boundOnChange(makeValue(decode(showList[0])))
           }
 
           // SPC helper key, auto fill
