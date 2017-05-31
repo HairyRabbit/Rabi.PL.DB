@@ -12,37 +12,24 @@ type Prop<T> = {
   render?: ?React.Element<*>,
   value: string,
   highlight: boolean,
-  transformer?: T => string,
-  selectValue: Function,
-  activeIdx: number
+  decode?: T => string
 }
 
 function AutoComplete<T>(props: Prop<T>): React.Element<*> {
-  const {
-    children,
-    render,
-    value,
-    highlight,
-    transformer,
-    selectValue,
-    activeIdx
-  } = props
+  const { children, render, value, highlight, decode } = props
   const Component = render || Render
   return (
     <div className={style.container}>
       <ul className={style.list}>
-        {children
+        {children && children.length !== 0
           ? children.map((item, idx) => (
               <li key={idx}>
-                <Component
-                  selectValue={selectValue(item)}
-                  isActive={idx === activeIdx}
-                >
+                <Component isActive={item.active}>
                   {highlight
                     ? <HighLight target={value}>
-                        {transformer(item)}
+                        {decode(item)}
                       </HighLight>
-                    : item}
+                    : decode(item)}
                 </Component>
               </li>
             ))

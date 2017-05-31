@@ -24,9 +24,9 @@ export type Direction = 1 | -1
 
 /// Msg
 
-export const Change: 'Change' = 'Change'
-export type OnChangeAction<T> = {
-  type: typeof Change,
+export const ChangeValue: 'ChangeValue' = 'ChangeValue'
+export type ChangeValueAction<T> = {
+  type: typeof ChangeValue,
   payload: {
     value: string,
     decode?: T => string
@@ -70,7 +70,7 @@ export type ResetAutoCompleteAction = {
 }
 
 export type Action<T> =
-  | OnChangeAction<T>
+  | ChangeValueAction<T>
   | TurnActiveAction
   | PushToAutoCompleteListAction<T>
   | RemoveAutoCompleteItemAction<T>

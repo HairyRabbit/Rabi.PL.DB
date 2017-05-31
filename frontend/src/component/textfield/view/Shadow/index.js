@@ -5,15 +5,16 @@
 import React from 'react'
 import style from './style.css'
 
-type Prop = {
-  children?: string
+type Prop<T> = {
+  children?: string,
+  decode: T => string
 }
 
-function Shadow(props: Prop): React.Element<*> {
-  const { children } = props
+function Shadow<T>(props: Prop<T>): ?React.Element<*> {
+  const { children, decode } = props
   return (
     <div className={style.container}>
-      {children}
+      {children ? decode(children) : null}
     </div>
   )
 }

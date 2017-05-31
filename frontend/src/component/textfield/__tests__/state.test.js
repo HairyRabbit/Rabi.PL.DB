@@ -1,6 +1,6 @@
 import configureMockStore from 'redux-mock-store'
-import { Change, TurnActive } from '../types'
-import { initModel, initAutoComplete, update, onChange } from '../state'
+import { ChangeValue, TurnActive } from '../types'
+import { initModel, initAutoComplete, update, change } from '../state'
 
 /// Update
 
@@ -8,7 +8,7 @@ describe('test update Change', () => {
   it('should change value.', () => {
     expect(
       update(initModel, {
-        type: Change,
+        type: ChangeValue,
         payload: {
           value: 'foo'
         }
@@ -30,7 +30,7 @@ describe('test update Change', () => {
 
     expect(
       update(model, {
-        type: Change,
+        type: ChangeValue,
         payload: {
           value: 'b',
           decode: x => x
@@ -42,7 +42,7 @@ describe('test update Change', () => {
       autocomplete: {
         ...model.autocomplete,
         display: [
-          { value: 'bar', active: false },
+          { value: 'bar', active: true },
           { value: 'baz', active: false }
         ]
       }
@@ -60,7 +60,7 @@ describe('test update Change', () => {
 
     expect(
       update(model, {
-        type: Change,
+        type: ChangeValue,
         payload: {
           value: 'b',
           decode: x => x
@@ -204,10 +204,10 @@ describe('test action', () => {
   const store = mockStore(initModel)
 
   it('action should change value', () => {
-    store.dispatch(onChange('foo'))
+    store.dispatch(change('foo'))
 
     expect(store.getActions()).toEqual([
-      { type: Change, payload: { value: 'foo' } }
+      { type: ChangeValue, payload: { value: 'foo' } }
     ])
   })
 })

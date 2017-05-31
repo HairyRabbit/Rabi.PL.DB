@@ -10,16 +10,26 @@ import Shadow from './view/Shadow'
 import AC from './view/AutoComplete'
 
 type Prop<T> = {
-  name: string,
-  type: Type,
+  // State
   value: string,
   autocomplete?: AutoComplete<T>,
+
+  // Action
+  boundChange: Function,
+  boundTurn?: Function,
+
+  // Required Options
+  name: string,
+  type: Type,
+
+  // AutoComplete Options
+  autocompleteValueDecode?: T => string,
+  autocompleteList?: boolean,
   autocompleteRender?: React.Element<*>,
-  initAutoComplete: Function,
-  pushToAutoComplete: Function,
-  changeValue: Function,
-  activeAutoComplete: Function,
-  resetAutoComplete: Function,
+  autocompleteHighlight?: boolean,
+  autocompleteShadow?: boolean,
+
+  // Native Input Event
   onChange?: Function,
   onKeyDown?: Function,
   onBlur?: Function,
@@ -28,56 +38,54 @@ type Prop<T> = {
 
 export function TextField<T>(props: Prop<T>): React.Element<*> {
   const {
-    name,
-    type,
     value,
     autocomplete,
+    boundChange,
+    boundTurn,
+
+    name,
+    type,
+
+    autocompleteValueDecode,
     autocompleteRender,
-    initAutoComplete,
-    pushToAutoComplete,
-    changeValue,
-    activeAutoComplete,
-    resetAutoComplete,
+    autocompleteList,
+    autocompleteHighlight,
+    autocompleteShadow,
+
     onChange,
     onKeyDown,
     onBlur,
+
     ...prop
   } = props
 
-  const boundOnChange: Function = changeValue(type)
+  const boundChangeWithType: Function = boundChange(type)
 
   function ShadowComponent(): ?React.Element<*> {
-    if (!autocomplete) {
+    if (!(autocomplete && autocompleteShadow && autocompleteValueDecode)) {
       return null
     }
-    const { suggest, decode, showList, matchidx } = autocomplete
-    if (!suggest) {
-      return null
-    }
-    if (matchidx !== -1) {
-      return null
-    }
-    if (showList.length === 0) {
-      return null
-    }
-    return <Shadow>{decode(showList[0])}</Shadow>
+    const { display } = autocomplete
+    return (
+      <Shadow decode={autocompleteValueDecode}>
+        {display.find(x => Boolean(x.active))}
+      </Shadow>
+    )
   }
 
   function AutoCompleteComponent<T>(): ?React.Element<*> {
-    if (!autocomplete) {
+    if (!(autocomplete && autocompleteList)) {
       return null
     }
-    const { highlight, showList, decode, matchidx } = autocomplete
+    const { display } = autocomplete
     return (
       <AC
         render={autocompleteRender}
-        highlight={autocomplete.highlight}
+        highlight={autocompleteHighlight}
         value={value}
-        transformer={decode}
-        selectValue={value => () => boundOnChange(makeValue(decode(value)))}
-        activeIdx={matchidx}
+        decode={autocompleteValueDecode}
       >
-        {autocomplete.showList}
+        {autocomplete.display}
       </AC>
     )
   }
@@ -96,19 +104,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
         className={style.main}
         {...prop}
         onBlur={evt => {
-          // Auto push on blur
-          if (
-            autocomplete &&
-            autocomplete.autoPush &&
-            pushToAutoComplete &&
-            typeof pushToAutoComplete === 'function'
-          ) {
-            pushToAutoComplete(value)
-          }
-
-          // if(autocomplete && autocomplete.matchidx !== -1) {
-          //   resetAutoComplete()
-          // }
+          // TODO Auto push on blur
 
           // Pass to native blur
           if (typeof onBlur === 'function') {
@@ -116,7 +112,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
           }
         }}
         onChange={evt => {
-          boundOnChange(evt)
+          boundChangeWithType(evt.target.value)
 
           // Pass to native change
           if (typeof onChange === 'function') {
@@ -132,49 +128,50 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
           // Build-in `C-l`
           if (evt.ctrlKey && evt.which === 76) {
             evt.preventDefault()
-            boundOnChange(makeValue(''))
+            boundChangeWithType('')
           }
 
           // AutoComplete Bind `Tab` key
-          if (autocomplete && evt.which === 9) {
+          if (autocomplete && autocompleteValueDecode && evt.which === 9) {
             evt.preventDefault()
-            const { decode, showList, matchidx } = autocomplete
-            if (showList.length !== 0) {
-              boundOnChange(makeValue(decode(showList[0])))
+            const { display } = autocomplete
+            if (display.length !== 0) {
+              boundChangeWithType(
+                autocompleteValueDecode(display.find(x => Boolean(x.active)))
+              )
             }
           }
 
           // AutoComplete Bind `Up/Down` key
-          if (autocomplete && (evt.which === 38 || evt.which === 40)) {
+          if (
+            autocomplete &&
+            boundTurn &&
+            (evt.which === 38 ||
+              evt.which === 40 ||
+              (evt.altKey && evt.which === 191))
+          ) {
             evt.preventDefault()
-            const updown: number = evt.which === 38 ? -1 : 1
-            activeAutoComplete(updown)
-            const { decode, showList, matchidx } = autocomplete
-            console.log(matchidx)
-            if (matchidx !== -1 && showList.length !== 0) {
-              boundOnChange(makeValue(decode(showList[matchidx])))
-            }
-          } else {
-            resetAutoComplete()
+            const dir: number = evt.which === 38 ? -1 : 1
+            boundTurn(dir)
           }
 
           // SPC helper key, auto fill
-          if (evt.which === 32 && type === 'ipv4') {
-            const value: string = evt.target.value
-            const key: string = evt.target.key
+          // if (evt.which === 32 && type === 'ipv4') {
+          //   const value: string = evt.target.value
+          //   const key: string = evt.target.key
 
-            switch (type) {
-              case 'ipv4': {
-                let spcIdx = value.indexOf(' ')
-                boundOnChange(makeValue(value + ' .'))
-                break
-              }
+          //   switch (type) {
+          //     case 'ipv4': {
+          //       let spcIdx = value.indexOf(' ')
+          //       boundOnChange(makeValue(value + ' .'))
+          //       break
+          //     }
 
-              default: {
-                break
-              }
-            }
-          }
+          //     default: {
+          //       break
+          //     }
+          //   }
+          // }
 
           // Pass to native keydown
           if (typeof onKeyDown === 'function') {

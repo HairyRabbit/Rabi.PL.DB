@@ -27,7 +27,9 @@ interface Model<T> {
 =value=
 
 
-** Feat.受控组件
+** 使用方法
+
+   受控组件
 
    需要绑定onChange事件
 
