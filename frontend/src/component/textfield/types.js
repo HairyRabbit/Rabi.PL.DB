@@ -2,9 +2,8 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-/// Msg
+/// Types
 
-// textfield type
 export type Type =
   | 'text'
   | 'password'
@@ -21,15 +20,28 @@ export type Type =
   | 'ipv4'
   | 'port'
 
-/* Basic usage */
+export type Direction = 1 | -1
+
+/// Msg
 
 export const Change: 'Change' = 'Change'
-export type OnChangeAction = {
+export type OnChangeAction<T> = {
   type: typeof Change,
-  payload: string
+  payload: {
+    value: string,
+    decode?: T => string
+  }
 }
 
 /* Auto complete */
+
+export const TurnActive: 'TurnSuggestActive' = 'TurnSuggestActive'
+export type TurnActiveAction = {
+  type: typeof TurnActive,
+  payload: {
+    direction: Direction
+  }
+}
 
 export const PushToAutoCompleteList: 'PushToAutoCompleteList' =
   'PushToAutoCompleteList'
@@ -47,32 +59,37 @@ export type RemoveAutoCompleteItemAction<T> = {
 
 export const ActiveAutoCompleteItem: 'ActiveAutoCompleteItem' =
   'ActiveAutoCompleteItem'
-export type ActiveAutoCompleteItemAction<T> = {
+export type ActiveAutoCompleteItemAction = {
   type: typeof ActiveAutoCompleteItem,
-  payload: T
+  payload: number
+}
+
+export const ResetAutoComplete: 'ResetAutoComplete' = 'ResetAutoComplete'
+export type ResetAutoCompleteAction = {
+  type: typeof ResetAutoComplete
 }
 
 export type Action<T> =
-  | OnChangeAction
+  | OnChangeAction<T>
+  | TurnActiveAction
   | PushToAutoCompleteListAction<T>
   | RemoveAutoCompleteItemAction<T>
-  | ActiveAutoCompleteItemAction<T>
+  | ActiveAutoCompleteItemAction
+  | ResetAutoComplete
 
 /// Model
 
+export type Display<T> = {
+  value: T,
+  active: boolean
+}
+
 export type AutoComplete<T> = {
   list: Array<T>,
-  showList: Array<T>,
-  suggest: boolean,
-  autoPush: boolean,
-  highlight: boolean,
-  decode: T => string,
-  encode: string => T
+  display: Array<Display<T>>
 }
 
 export type Model<T> = {
   value: string,
-  type: Type,
-  name: string,
-  autocomplete: ?AutoComplete<T>
+  autocomplete?: AutoComplete<T>
 }

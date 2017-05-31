@@ -3,6 +3,7 @@
 // @flow
 
 import React from 'react'
+import debug from 'lib/debug-event-key'
 import style from './style.css'
 import type { Type, AutoComplete } from './types'
 import Shadow from './view/Shadow'
@@ -16,7 +17,10 @@ type Prop<T> = {
   autocompleteRender?: React.Element<*>,
   initAutoComplete: Function,
   pushToAutoComplete: Function,
-  onChange: Function,
+  changeValue: Function,
+  activeAutoComplete: Function,
+  resetAutoComplete: Function,
+  onChange?: Function,
   onKeyDown?: Function,
   onBlur?: Function,
   prop: Array<any>
@@ -31,25 +35,31 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     autocompleteRender,
     initAutoComplete,
     pushToAutoComplete,
+    changeValue,
+    activeAutoComplete,
+    resetAutoComplete,
     onChange,
     onKeyDown,
     onBlur,
     ...prop
   } = props
 
-  const boundOnChange: Function = onChange(type)
+  const boundOnChange: Function = changeValue(type)
 
   function ShadowComponent(): ?React.Element<*> {
-    if (!(autocomplete && autocomplete.suggest)) {
+    if (!autocomplete) {
       return null
     }
-
-    const { decode, showList } = autocomplete
-
+    const { suggest, decode, showList, matchidx } = autocomplete
+    if (!suggest) {
+      return null
+    }
+    if (matchidx !== -1) {
+      return null
+    }
     if (showList.length === 0) {
       return null
     }
-
     return <Shadow>{decode(showList[0])}</Shadow>
   }
 
@@ -57,14 +67,15 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     if (!autocomplete) {
       return null
     }
-
-    const { highlight, showList } = autocomplete
-
+    const { highlight, showList, decode, matchidx } = autocomplete
     return (
       <AC
         render={autocompleteRender}
         highlight={autocomplete.highlight}
         value={value}
+        transformer={decode}
+        selectValue={value => () => boundOnChange(makeValue(decode(value)))}
+        activeIdx={matchidx}
       >
         {autocomplete.showList}
       </AC>
@@ -95,22 +106,27 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
             pushToAutoComplete(value)
           }
 
+          // if(autocomplete && autocomplete.matchidx !== -1) {
+          //   resetAutoComplete()
+          // }
+
           // Pass to native blur
           if (typeof onBlur === 'function') {
             onBlur(evt)
           }
         }}
-        onChange={boundOnChange}
+        onChange={evt => {
+          boundOnChange(evt)
+
+          // Pass to native change
+          if (typeof onChange === 'function') {
+            onChange(evt)
+          }
+        }}
         onKeyDown={evt => {
           // Debugger
           if (process.env.NODE_ENV === 'development') {
-            console.log(
-              `TextField: ${name}\n` +
-                require('lib/pretty-print-table')['default'](`\
-| key | code | ctrl | alt | meta | shift |
-| ${evt.key} | ${evt.which} | ${evt.ctrlKey} | ${evt.altKey} | ${evt.metaKey} | ${evt.shiftKey} |
-`)
-            )
+            console.log(`TextField: ${name}\n` + debug(evt))
           }
 
           // Build-in `C-l`
@@ -122,8 +138,24 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
           // AutoComplete Bind `Tab` key
           if (autocomplete && evt.which === 9) {
             evt.preventDefault()
-            const { decode, showList } = autocomplete
-            boundOnChange(makeValue(decode(showList[0])))
+            const { decode, showList, matchidx } = autocomplete
+            if (showList.length !== 0) {
+              boundOnChange(makeValue(decode(showList[0])))
+            }
+          }
+
+          // AutoComplete Bind `Up/Down` key
+          if (autocomplete && (evt.which === 38 || evt.which === 40)) {
+            evt.preventDefault()
+            const updown: number = evt.which === 38 ? -1 : 1
+            activeAutoComplete(updown)
+            const { decode, showList, matchidx } = autocomplete
+            console.log(matchidx)
+            if (matchidx !== -1 && showList.length !== 0) {
+              boundOnChange(makeValue(decode(showList[matchidx])))
+            }
+          } else {
+            resetAutoComplete()
           }
 
           // SPC helper key, auto fill

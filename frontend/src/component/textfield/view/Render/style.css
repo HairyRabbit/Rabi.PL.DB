@@ -1,0 +1,29 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+@value left-width from '../../style.css';
+
+.container {
+  composes: container from '../../style.css';
+  cursor: pointer;
+}
+
+.left {
+  composes: left from '../../style.css';
+}
+
+.circle {
+  composes: circle from '../../style.css';
+  size: 0.5rem;
+}
+
+.container:hover .circle,
+.container.active .circle {
+  background: var(--primary-color);
+}
+
+.main {
+  composes: main from '../../style.css';
+  padding: 0.25rem 1rem;
+  padding-left: 2.5rem;
+}

@@ -7,110 +7,171 @@ import identity from 'lodash/identity'
 import ipv4 from 'lib/is-ipv4'
 import {
   Change,
+  TurnActive,
   PushToAutoCompleteList,
   RemoveAutoCompleteItem,
-  ActiveAutoCompleteItem
+  ActiveAutoCompleteItem,
+  ResetAutoComplete
 } from './types'
 import type {
   Model,
   Action,
   Type,
   AutoComplete,
+  Display,
+  Direction,
   OnChangeAction,
+  TurnActiveAction,
   PushToAutoCompleteListAction,
   RemoveAutoCompleteItemAction,
-  ActiveAutoCompleteItemAction
+  ActiveAutoCompleteItemAction,
+  ResetAutoCompleteAction
 } from './types'
 
 /// Update
 
 export const initAutoComplete: AutoComplete<*> = {
   list: [],
-  showList: [],
-  suggest: false,
-  autoPush: false,
-  highlight: false,
-  decode: identity,
-  encode: identity
+  display: []
 }
 
 export const initModel: Model<*> = {
-  value: '',
-  type: 'text',
-  name: '',
-  autocomplete: null
+  value: ''
 }
 
-export function update<T>(model: Model<T>, action: ?Action<T>): Model<T> {
-  if (!action) return model
-
+export function update<T>(model: Model<T>, action: Action<T>): Model<T> {
   switch (action.type) {
     case Change: {
-      const value: string = action.payload
+      const value: string = action.payload.value
 
-      if (!model.autocomplete) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[TextField] AutoComplete was not enabled.')
-        }
-        return Object.assign({}, model, {
-          value: value
-        })
+      // value no changed
+      if (value === initModel.value || value === model.value) {
+        return model
       }
 
-      const { list, showList, decode } = model.autocomplete
+      const ac: ?AutoComplete<T> = model.autocomplete
 
+      // basic set value
+      if (!ac) {
+        return { ...model, value: value }
+      }
+
+      const list: Array<T> = ac.list
+
+      // empty ac list
       if (list.length === 0) {
-        return Object.assign({}, model, {
-          value: value
-        })
+        return { ...model, value: value }
       }
 
-      function filter(item: T): boolean {
-        const regex: RegExp = new RegExp(`^${value}`)
-        if (typeof item === 'string') {
-          return Boolean(item.match(regex))
-        }
+      const decode: T => string = action.payload.decode || identity
 
+      // matched value
+      function matched(item: T): boolean {
+        const regex: RegExp = new RegExp(`^${value}`)
         return Boolean(decode(item).match(regex))
       }
 
-      return Object.assign({}, model, {
+      // map to display list
+      function mapToDisplay(item: T): { value: T, active: boolean } {
+        return {
+          value: item,
+          active: false
+        }
+      }
+
+      return {
+        ...model,
         value: value,
         autocomplete: {
-          ...model.autocomplete,
-          showList: list.filter(filter).sort()
+          ...ac,
+          display: list.filter(matched).sort().map(mapToDisplay)
         }
-      })
+      }
     }
 
-    case PushToAutoCompleteList: {
-      if (!model.autocomplete) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('[TextField] AutoComplete was not enabled.')
-        }
+    case TurnActive: {
+      const ac: ?AutoComplete<T> = model.autocomplete
+
+      // not enable ac
+      if (!ac) {
         return model
       }
 
-      const value: T = action.payload
-      const { list, showList, decode } = model.autocomplete
+      const list: Array<T> = ac.list
 
-      function filter(target: T): Function {
-        return function(item: T): Boolean {
-          return eq(decode(item), decode(target))
-        }
-      }
-
-      if (list.filter(filter(value)).length !== 0) {
+      // empty list
+      if (list.length === 0) {
         return model
       }
 
-      return Object.assign({}, model, {
+      const display: Array<Display<T>> = ac.display
+      const len: number = display.length
+
+      // empty display list
+      if (len === 0) {
+        return model
+      }
+
+      function mapActive<T>(activep: boolean): Function {
+        return function(item: Display<T>): Display<T> {
+          return {
+            ...item,
+            active: activep
+          }
+        }
+      }
+
+      // only one item
+      if (len === 1) {
+        return {
+          ...model,
+          autocomplete: {
+            ...ac,
+            display: display.map(mapActive(true))
+          }
+        }
+      }
+
+      const idx: number = display.findIndex(item => Boolean(item.active))
+      const dir: Direction = action.payload.direction
+      let next: number
+
+      switch (dir) {
+        case 1: {
+          if (idx === -1) {
+            next = 0
+          } else {
+            next = idx + 1 > display.length - 1 ? 0 : idx + 1
+          }
+          break
+        }
+        case -1: {
+          if (idx === -1) {
+            next = display.length - 1
+          } else {
+            next = idx - 1 < 0 ? display.length - 1 : idx - 1
+          }
+          break
+        }
+        default: {
+          next = 0
+          break
+        }
+      }
+
+      const di: Array<Display<T>> = display.map(mapActive(false))
+
+      return {
+        ...model,
         autocomplete: {
-          ...model.autocomplete,
-          list: [...list, value],
-          showList: [...showList, value]
+          ...ac,
+          display: [
+            ...di.slice(0, next),
+            mapActive(true)(di[next]),
+            ...di.slice(next + 1)
+          ]
         }
-      })
+      }
     }
 
     default: {
@@ -134,7 +195,9 @@ export function onChange(value: string, type: Type): OnChangeAction {
     default:
       return {
         type: Change,
-        payload: value
+        payload: {
+          value
+        }
       }
   }
 }
@@ -143,6 +206,19 @@ export function pushac<T>(value: T): PushToAutoCompleteListAction<T> {
   return {
     type: PushToAutoCompleteList,
     payload: value
+  }
+}
+
+export function activeac(dir: number): ActiveAutoCompleteItemAction {
+  return {
+    type: ActiveAutoCompleteItem,
+    payload: dir
+  }
+}
+
+export function resetac(): ResetAutoCompleteAction {
+  return {
+    type: ResetAutoComplete
   }
 }
 

@@ -4,6 +4,7 @@
 .container {
   composes: position-fill from 'style/position-fill.css';
   top: 100%;
+  background: #f0f0f0;
 }
 
 .list {

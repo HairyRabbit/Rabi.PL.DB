@@ -3,13 +3,37 @@
   文本输入框
 
 
-** 受控组件
+** Model
+
+#+BEGIN_SRC js
+
+interface Model<T> {
+  value: string,
+  autocomplete?: {
+    list: Array<T>,
+    display: Array<{
+      value: T, 
+      active: boolean 
+    }>
+  },
+  validator?: {
+    validating: boolean,
+    validated: boolean
+  }
+}
+
+#+END_SRC
+
+=value=
+
+
+** Feat.受控组件
 
    需要绑定onChange事件
 
 
 
-** 键绑定
+** Feat.键绑定
 
    =C-l= 清空输入框内容
    

@@ -5,20 +5,15 @@
 import React from 'react'
 import style from './style.css'
 
-type Prop<T> = {
-  children?: T,
-  target: string,
-  transformer?: T => string
+type Prop = {
+  children?: string,
+  target: string
 }
 
-function HighLight<T>(props: Prop<T>): React.Element<*> {
-  const { children, target, transformer } = props
+function HighLight(props: Prop): React.Element<*> {
+  const { children, target } = props
   if (!children) return <div />
-  const ctx: string = typeof children === 'string'
-    ? children
-    : transformer && typeof transformer === 'function'
-        ? transformer(children)
-        : JSON.stringify(children)
+  const ctx: string = children
   const idx: number = ctx.indexOf(target)
   const len: number = target.length
   if (idx === -1) return <div>{ctx}</div>
