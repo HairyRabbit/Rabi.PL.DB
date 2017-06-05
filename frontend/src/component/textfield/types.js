@@ -2,7 +2,7 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-/// Types
+/// TYPES
 
 export type Type =
   | 'text'
@@ -22,7 +22,7 @@ export type Type =
 
 export type Direction = 1 | -1
 
-/// Msg
+/// MSG
 
 export const ChangeValue: 'ChangeValue' = 'ChangeValue'
 export type ChangeValueAction<T> = {
@@ -40,6 +40,15 @@ export type TurnActiveAction = {
   type: typeof TurnActive,
   payload: {
     direction: Direction
+  }
+}
+
+export const ToggleList: 'ToggleList' = 'ToggleList'
+export type ToggleListAction = {
+  type: typeof ToggleList,
+  payload: {
+    visibility: boolean,
+    decode?: T => string
   }
 }
 
@@ -72,12 +81,13 @@ export type ResetAutoCompleteAction = {
 export type Action<T> =
   | ChangeValueAction<T>
   | TurnActiveAction
+  | ToggleListAction
   | PushToAutoCompleteListAction<T>
   | RemoveAutoCompleteItemAction<T>
   | ActiveAutoCompleteItemAction
   | ResetAutoComplete
 
-/// Model
+/// MODEL
 
 export type Display<T> = {
   value: T,

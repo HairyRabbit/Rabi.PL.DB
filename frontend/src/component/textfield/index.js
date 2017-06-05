@@ -10,29 +10,27 @@ import Shadow from './view/Shadow'
 import AC from './view/AutoComplete'
 
 type Prop<T> = {
-  // State
+  // STATE
   value: string,
   autocomplete?: AutoComplete<T>,
 
-  // Action
+  // ACTION
   boundChange: Function,
   boundTurn?: Function,
+  boundToggle?: Function,
 
-  // Required Options
+  // OPTIONS
   name: string,
   type: Type,
 
-  // AutoComplete Options
+  // OPTIONS.AutoComplete
   autocompleteValueDecode?: T => string,
   autocompleteList?: boolean,
   autocompleteRender?: React.Element<*>,
   autocompleteHighlight?: boolean,
   autocompleteShadow?: boolean,
 
-  // Native Input Event
-  onChange?: Function,
-  onKeyDown?: Function,
-  onBlur?: Function,
+  // OPTIONS.native
   prop: Array<any>
 }
 
@@ -42,6 +40,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     autocomplete,
     boundChange,
     boundTurn,
+    boundToggle,
 
     name,
     type,
@@ -54,6 +53,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
 
     onChange,
     onKeyDown,
+    onFocus,
     onBlur,
 
     ...prop
@@ -84,6 +84,8 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
         highlight={autocompleteHighlight}
         value={value}
         decode={autocompleteValueDecode}
+        onSelect={boundChangeWithType}
+        onAfterSelect={() => boundToggle(autocompleteValueDecode, false)}
       >
         {autocomplete.display}
       </AC>
@@ -103,7 +105,19 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
         name={name}
         className={style.main}
         {...prop}
+        onFocus={evt => {
+          if (autocomplete && autocompleteList) {
+            boundToggle(autocompleteValueDecode, true)
+          }
+
+          if (typeof onFocus === 'function') {
+            onFocus(evt)
+          }
+        }}
         onBlur={evt => {
+          if (autocomplete && autocompleteList) {
+            boundToggle(autocompleteValueDecode, false)
+          }
           // TODO Auto push on blur
 
           // Pass to native blur

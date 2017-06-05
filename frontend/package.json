@@ -63,6 +63,7 @@
     "html-webpack-plugin": "https://github.com/yuffiy/html-webpack-plugin.git",
     "html-webpack-template": "^6.0.1",
     "husky": "^0.13.3",
+    "identity-obj-proxy": "^3.0.0",
     "isomorphic-fetch": "^2.2.1",
     "jest": "^19.0.2",
     "lint-staged": "^3.4.1",
@@ -86,11 +87,21 @@
     "worker-loader": "^0.8.0"
   },
   "jest": {
-    "verbose": true
+    "verbose": true,
+    "moduleNameMapper": {
+      "^lib/(.*)$": "<rootDir>/src/lib/$1",
+      "^style/(.*)$": "<rootDir>/src/lib/styles/$1",
+      "^view/(.*)$": "<rootDir>/src/view/$1",
+      "^component/(.*)$": "<rootDir>/src/component/$1",
+      "^core/(.*)$": "<rootDir>/src/core/$1",
+      "\\.css$": "identity-obj-proxy",
+      "\\.(webp|jpg|png|svg)$": "<rootDir>/builder/mocks/fileTransformer.js"
+    }
   },
   "dependencies": {
     "history": "^4.6.1",
     "lodash": "^4.17.4",
+    "normalize.css": "^7.0.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-redux": "^5.0.4",

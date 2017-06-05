@@ -7,7 +7,8 @@ import identity from 'lodash/identity'
 import ipv4 from 'lib/is-ipv4'
 import changeValue from './state/change-value'
 import turnActive from './state/turn-active'
-import { ChangeValue, TurnActive } from './types'
+import toggleList from './state/toggle-list'
+import { ChangeValue, TurnActive, ToggleList } from './types'
 import type {
   Model,
   Action,
@@ -16,10 +17,11 @@ import type {
   Display,
   Direction,
   ChangeValueAction,
-  TurnActiveAction
+  TurnActiveAction,
+  ToggleListAction
 } from './types'
 
-/// Init
+/// INIT
 
 export const initAutoComplete: AutoComplete<*> = {
   list: [],
@@ -30,7 +32,7 @@ export const initModel: Model<*> = {
   value: ''
 }
 
-/// Update
+/// UPDATE
 
 export function update<T>(model: Model<T>, action: Action<T>): Model<T> {
   switch (action.type) {
@@ -38,12 +40,14 @@ export function update<T>(model: Model<T>, action: Action<T>): Model<T> {
       return changeValue(model, action)
     case TurnActive:
       return turnActive(model, action)
+    case ToggleList:
+      return toggleList(model, action)
     default:
       return model
   }
 }
 
-/// Action
+/// ACTION
 
 export function change<T>(
   value: string,
@@ -82,7 +86,20 @@ export function turn(dir: number): TurnActiveAction {
   }
 }
 
-/// Helper
+export function toggle(
+  decode: T => string,
+  visibility: boolean
+): ToggleListAction {
+  return {
+    type: ToggleList,
+    payload: {
+      decode,
+      visibility
+    }
+  }
+}
+
+/// HELPER
 
 function encodeIpv4(str: string): string {
   return decodeIpv4(str).join(' . ')

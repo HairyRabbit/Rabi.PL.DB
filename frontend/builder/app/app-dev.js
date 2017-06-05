@@ -48,8 +48,8 @@ function webpackOptions(config): WebpackOptions {
           test: /\.css$/,
           use: [
             'style-loader',
-            'css-loader?modules=true&importLoaders=1',
-            'postcss-loader'
+            'css-loader?modules=true&importLoaders=1&sourceMap',
+            'postcss-loader?sourceMap'
           ]
         }
       ]

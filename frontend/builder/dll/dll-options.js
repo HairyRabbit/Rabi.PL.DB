@@ -43,6 +43,14 @@ export default function dllOptions(
       filename: '[name].js',
       library: '[name]'
     },
+    module: {
+      rules: [
+        {
+          test: /\.css$/,
+          use: ['style-loader', 'css-loader']
+        }
+      ]
+    },
     plugins: [
       new DllPlugin({
         path: dllfod('[name]-manifest.json'),

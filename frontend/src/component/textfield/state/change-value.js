@@ -2,6 +2,7 @@
 // -*- coding: utf-8 -*-
 // @flow
 
+import stubTrue from 'lodash/stubtrue'
 import identity from 'lodash/identity'
 import type {
   Model,
@@ -12,14 +13,14 @@ import type {
   ChangeValueAction
 } from '../types'
 
-function mapToDisplay<T>(item: T, idx: number): Display<T> {
+export function mapToDisplay<T>(item: T, idx: number): Display<T> {
   return {
     value: item,
     active: idx === 0
   }
 }
 
-function matched<T>(decode: T => string, value: string): Function {
+export function matched<T>(decode: T => string, value: string): Function {
   return function(item: T): boolean {
     const regex: RegExp = new RegExp(`^${value}`)
     return Boolean(decode(item).match(regex))
@@ -59,9 +60,10 @@ function changeValue<T>(
     value: value,
     autocomplete: {
       ...ac,
-      display: value === ''
-        ? []
-        : list.filter(matched(decode, value)).sort().map(mapToDisplay)
+      display: list
+        .filter(value === '' ? stubTrue : matched(decode, value))
+        .sort()
+        .map(mapToDisplay)
     }
   }
 }

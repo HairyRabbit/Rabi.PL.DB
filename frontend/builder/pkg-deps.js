@@ -23,7 +23,8 @@ type Dependencies = {
  */
 function vendors(deps: Dependencies): Array<string> {
   // TODO blacklist supports
-  return Object.keys(deps).filter(x => !/\.css$/.test(x))
+  //return Object.keys(deps).filter(x => !/\.css$/.test(x))
+  return Object.keys(deps)
 }
 
 export default vendors(pkg.dependencies)

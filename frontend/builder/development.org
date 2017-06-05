@@ -1,3 +1,7 @@
+#+Title: App development builder
+#+Author: Rabbit
+
+
 * App development builder
 
   Build development App.
@@ -64,20 +68,21 @@
 
 *** Webpack 别名系统
 
-如果文件嵌套很深的情况下，路径会出现很多的=../=
+    如果文件嵌套很深的情况下，路径会出现很多的 =../=
 
 #+BEGIN_SRC css
-// component/foo/view/bar/style.css
+/**
+ * component/foo/view/bar/style.css
+ */
+
 .test {
   composes: '../../../../lib/styles/util.css'
 }
 #+END_SRC
 
-可以使用Webpack的Alias来解决这个问题
+    可以使用 Webpack 的[[http://devdocs.io/webpack~2/configuration/resolve/index#resolve-alias][ Alias]] 来解决这个问题
 
-[[http://devdocs.io/webpack~2/configuration/resolve/index#resolve-alias][DevDocs.io/webpack2/resolve-alias]]
-
-通过使用路径别名，就可以不用在写太长的相对路径了，只需要给他个名称就好
+    通过使用路径别名，就可以不用在写太长的相对路径了，只需要给他个名称就好
 
 #+BEGIN_SRC js
 resolve: {
@@ -87,7 +92,7 @@ resolve: {
 }
 #+END_SRC
 
-定义别名时尽量使用绝对路径，就是用path.resolve来定义目录路径，避免不必要的麻烦
+    定义别名时尽量使用绝对路径，就是用path.resolve来定义目录路径，避免不必要的麻烦
 
 
 *** 已定义的Alias
@@ -98,23 +103,23 @@ resolve: {
 | style     | src/lib/styles |
 | core      | src/core       |
 | view      | src/view       |
-| component | src/component  | 
+| component | src/component  |
 
 
-TODO assets path
+:TODO: assets path
 
 
 *** 使用Alias带来的问题
 
-提升开发效率的同时，使用alias也会带来一定的问题，其中最重要的就是工具会无法识别我们改写之后的路径
+    提升开发效率的同时，使用alias也会带来一定的问题，其中最重要的就是工具会无法识别我们改写之后的路径
 
-比如[[http://facebook.github.io/jest/][Jest]]和[[https://flow.org/][Flow]]
+    比如 [[http://facebook.github.io/jest/][Jest ]]和[[https://flow.org/][ Flow]]
 
 *** 配置Jest
 
-当我们使用Jest对代码经行测试时，会因alias找不到目标文件而报错，所以我们需要配置Jest的[[http://devdocs.io/jest/configuration#modulenamemapper-object-string-string][moduleNameMapper]]
+    当我们使用Jest对代码经行测试时，会因alias找不到目标文件而报错，所以我们需要配置Jest的[[http://devdocs.io/jest/configuration#modulenamemapper-object-string-string][moduleNameMapper]]
 
-大概就是按照Jest所定义的规则在=package.json=将Alias再重写一遍
+    大概就是按照Jest所定义的规则在=package.json=将Alias再重写一遍
 
 #+BEGIN_SRC js
 {
@@ -133,9 +138,9 @@ TODO assets path
 
 *** 配置Flow
 
-使用Flowtype来检查类型的话，也会遇到同样的问题
+    使用Flowtype来检查类型的话，也会遇到同样的问题
 
-这就需要在.flowconfig中定义[[http://devdocs.io/flow/config/options#toc-module-name-mapper-regex-string][mamemapper]]
+    这就需要在 =.flowconfig= 中定义[[http://devdocs.io/flow/config/options#toc-module-name-mapper-regex-string][mamemapper]]
 
 #+BEGIN_SRC js
 [options]
@@ -146,6 +151,6 @@ module.name_mapper='^component\/\(.*\)$' -> '<PROJECT_ROOT>\/src\/component\/\1'
 module.name_mapper='^core\/\(.*\)$' -> '<PROJECT_ROOT>\/src\/core\/\1'
 #+END_SRC
 
-*** emacs 配置
+*** TODO 配置emacs
 
 TODO

@@ -43,3 +43,6 @@ flow-typed
 # Webpack Config
 webpack.config.js
 .cache-loader
+
+# Emacs auto save file
+\#*\#
