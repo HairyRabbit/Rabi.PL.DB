@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test TextField should change value on dispatched. 1`] = `
+<div
+  className="container"
+>
+  <div
+    className="left"
+  >
+    <div
+      className="circle"
+    />
+  </div>
+  <input
+    className="main"
+    id={undefined}
+    name={undefined}
+    onBlur={[Function]}
+    onChange={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    type="text"
+    value="foo"
+  />
+</div>
+`;
+
+exports[`test TextField should clean value. 1`] = `
+<div
+  className="container"
+>
+  <div
+    className="left"
+  >
+    <div
+      className="circle"
+    />
+  </div>
+  <input
+    className="main"
+    id={undefined}
+    name={undefined}
+    onBlur={[Function]}
+    onChange={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    type="text"
+    value=""
+  />
+</div>
+`;
+
+exports[`test TextField should init component. 1`] = `
+<div
+  className="container"
+>
+  <div
+    className="left"
+  >
+    <div
+      className="circle"
+    />
+  </div>
+  <input
+    className="main"
+    id={undefined}
+    name={undefined}
+    onBlur={[Function]}
+    onChange={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    type="text"
+    value=""
+  />
+</div>
+`;
+
+exports[`test TextField should tap tab key autocomplate matched value. 1`] = `
+<div
+  className="container"
+>
+  <div
+    className="left"
+  >
+    <div
+      className="circle"
+    />
+  </div>
+  <input
+    className="main"
+    id={undefined}
+    name={undefined}
+    onBlur={[Function]}
+    onChange={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    type="text"
+    value="bar"
+  />
+</div>
+`;

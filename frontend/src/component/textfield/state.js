@@ -87,14 +87,14 @@ export function turn(dir: number): TurnActiveAction {
 }
 
 export function toggle(
-  decode: T => string,
-  visibility: boolean
+  visibility: boolean,
+  decode: T => string
 ): ToggleListAction {
   return {
     type: ToggleList,
     payload: {
-      decode,
-      visibility
+      visibility,
+      decode
     }
   }
 }

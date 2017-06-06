@@ -34,14 +34,13 @@ function setDisplay<T>(
 function toggleList<T>(model: Model<T>, action: ToggleListAction<T>): Model<T> {
   const ac: ?AutoComplete<T> = model.autocomplete
 
-  // basic set value
   if (!ac) {
     return model
   }
 
-  // empty ac list
   const list: Array<T> = ac.list
 
+  // empty ac list
   if (list.length === 0) {
     return model
   }

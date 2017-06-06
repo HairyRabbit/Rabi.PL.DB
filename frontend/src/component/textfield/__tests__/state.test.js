@@ -1,8 +1,18 @@
-import configureMockStore from 'redux-mock-store'
-import { ChangeValue, TurnActive } from '../types'
-import { initModel, initAutoComplete, update, change } from '../state'
+// -*- mode: js -*-
+// -*- coding: utf-8 -*-
 
-/// Update
+import configureMockStore from 'redux-mock-store'
+import { ChangeValue, TurnActive, ToggleList } from '../types'
+import {
+  initModel,
+  initAutoComplete,
+  update,
+  change,
+  turn,
+  toggle
+} from '../state'
+
+/// UPDATE
 
 describe('test update Change', () => {
   it('should change value.', () => {
@@ -194,20 +204,132 @@ describe('test update TurnActive', () => {
   })
 })
 
-/// Action
+describe('test update toggle visibility', () => {
+  it('should copy list to display when visible and blank value.', () => {
+    const model = {
+      ...initModel,
+      autocomplete: {
+        ...initAutoComplete,
+        list: ['foo', 'bar', 'baz']
+      }
+    }
 
-describe('test action', () => {
-  // configure store
+    expect(
+      update(model, {
+        type: ToggleList,
+        payload: {
+          decode: x => x,
+          visibility: true
+        }
+      })
+    ).toEqual({
+      ...model,
+      autocomplete: {
+        ...model.autocomplete,
+        display: [
+          { value: 'bar', active: true },
+          { value: 'baz', active: false },
+          { value: 'foo', active: false }
+        ]
+      }
+    })
+  })
 
+  it('should match list to display when visible and value not blank.', () => {
+    const model = {
+      ...initModel,
+      value: 'ba',
+      autocomplete: {
+        ...initAutoComplete,
+        list: ['foo', 'bar', 'baz']
+      }
+    }
+
+    expect(
+      update(model, {
+        type: ToggleList,
+        payload: {
+          decode: x => x,
+          visibility: true
+        }
+      })
+    ).toEqual({
+      ...model,
+      autocomplete: {
+        ...model.autocomplete,
+        display: [
+          { value: 'bar', active: true },
+          { value: 'baz', active: false }
+        ]
+      }
+    })
+  })
+
+  it('should clear list when hidden.', () => {
+    const model = {
+      ...initModel,
+      value: 'ba',
+      autocomplete: {
+        ...initAutoComplete,
+        list: ['foo', 'bar', 'baz']
+      }
+    }
+
+    expect(
+      update(model, {
+        type: ToggleList,
+        payload: {
+          decode: x => x,
+          visibility: false
+        }
+      })
+    ).toEqual({
+      ...model,
+      autocomplete: {
+        ...model.autocomplete,
+        display: []
+      }
+    })
+  })
+})
+
+/// ACTION
+
+describe('test action change value', () => {
   const mockStore = configureMockStore()
-
   const store = mockStore(initModel)
 
-  it('action should change value', () => {
+  it('should change value.', () => {
     store.dispatch(change('foo'))
 
     expect(store.getActions()).toEqual([
       { type: ChangeValue, payload: { value: 'foo' } }
+    ])
+  })
+})
+
+describe('test action turn active', () => {
+  const mockStore = configureMockStore()
+  const store = mockStore(initModel)
+
+  it('should turn actived.', () => {
+    store.dispatch(turn(1))
+
+    expect(store.getActions()).toEqual([
+      { type: TurnActive, payload: { direction: 1 } }
+    ])
+  })
+})
+
+describe('test action toggle visibility', () => {
+  const mockStore = configureMockStore()
+  const store = mockStore(initModel)
+
+  it('should toggle visibility.', () => {
+    store.dispatch(toggle(true))
+
+    expect(store.getActions()).toEqual([
+      { type: ToggleList, payload: { visibility: true } }
     ])
   })
 })

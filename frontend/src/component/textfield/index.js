@@ -77,7 +77,6 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     if (!(autocomplete && autocompleteList)) {
       return null
     }
-    const { display } = autocomplete
     return (
       <AC
         render={autocompleteRender}
@@ -85,7 +84,6 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
         value={value}
         decode={autocompleteValueDecode}
         onSelect={boundChangeWithType}
-        onAfterSelect={() => boundToggle(autocompleteValueDecode, false)}
       >
         {autocomplete.display}
       </AC>
@@ -139,13 +137,13 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
             console.log(`TextField: ${name}\n` + debug(evt))
           }
 
-          // Build-in `C-l`
+          // NOTE Build-in `C-l`
           if (evt.ctrlKey && evt.which === 76) {
             evt.preventDefault()
             boundChangeWithType('')
           }
 
-          // AutoComplete Bind `Tab` key
+          // NOTE AutoComplete Bind `Tab` key
           if (autocomplete && autocompleteValueDecode && evt.which === 9) {
             evt.preventDefault()
             const { display } = autocomplete
@@ -156,7 +154,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
             }
           }
 
-          // AutoComplete Bind `Up/Down` key
+          // NOTE AutoComplete Bind `Up/Down` key
           if (
             autocomplete &&
             boundTurn &&
