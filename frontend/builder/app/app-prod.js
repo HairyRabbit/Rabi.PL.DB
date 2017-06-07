@@ -15,6 +15,7 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin'
 import ManifestPlugin from 'webpack-manifest-plugin'
 import ChunkManifestPlugin from 'chunk-manifest-webpack-plugin'
 import WebpackChunkHash from 'webpack-chunk-hash'
+import IconPlugin from '../icon-plugin'
 import findConfigs from './../find-configs'
 import foldConfigs from './../fold-configs'
 import type { WebpackOptions } from './webpack-options'
@@ -32,6 +33,13 @@ const CommonsChunkPlugin: CommonsChunkPlugin =
 const distPath: string = path.resolve(__dirname, 'dist')
 const srcPath: string = path.resolve(__dirname, 'src')
 const configPath: string = path.resolve(__dirname, 'config')
+const libPath: string = path.resolve(srcPath, 'lib')
+const libStylePath: string = path.resolve(libPath, 'styles')
+const viewPath: string = path.resolve(srcPath, 'view')
+const componentPath: string = path.resolve(srcPath, 'component')
+const corePath: string = path.resolve(srcPath, 'core')
+const iconPath: string = 'feather/icons'
+const webfontsPath: string = path.resolve(distPath, 'fonts')
 
 function webpackOptions(config: Object): WebpackOptions {
   const { libs, umd } = config
@@ -67,6 +75,16 @@ function webpackOptions(config: Object): WebpackOptions {
       ]
     },
     externals: externals,
+    resolve: {
+      alias: {
+        lib: libPath,
+        style: libStylePath,
+        view: viewPath,
+        component: componentPath,
+        core: corePath,
+        icon: iconPath
+      }
+    },
     plugins: [
       // Generate html page
       new HtmlWebpackPlugin({
@@ -95,6 +113,11 @@ function webpackOptions(config: Object): WebpackOptions {
       new ChunkManifestPlugin({
         filename: 'chunk-manifest.json',
         manifestVariable: 'webpackManifest'
+      }),
+
+      new IconPlugin({
+        outputPath: 'fonts',
+        outputName: 'iconfont'
       })
     ]
   }

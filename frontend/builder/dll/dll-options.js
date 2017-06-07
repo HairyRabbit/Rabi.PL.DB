@@ -48,6 +48,10 @@ export default function dllOptions(
         {
           test: /\.css$/,
           use: ['style-loader', 'css-loader']
+        },
+        {
+          test: /icon[^.]+\.svg$/,
+          use: ['babel-loader', 'react-svg-loader']
         }
       ]
     },

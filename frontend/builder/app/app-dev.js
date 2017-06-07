@@ -26,6 +26,7 @@ const libStylePath: string = path.resolve(libPath, 'styles')
 const viewPath: string = path.resolve(srcPath, 'view')
 const componentPath: string = path.resolve(srcPath, 'component')
 const corePath: string = path.resolve(srcPath, 'core')
+const iconPath: string = 'feather/icons'
 
 function webpackOptions(config): WebpackOptions {
   return {
@@ -51,6 +52,10 @@ function webpackOptions(config): WebpackOptions {
             'css-loader?modules=true&importLoaders=1&sourceMap',
             'postcss-loader?sourceMap'
           ]
+        },
+        {
+          test: /icon[^.]+\.svg$/,
+          use: ['babel-loader', 'react-svg-loader']
         }
       ]
     },
@@ -60,7 +65,8 @@ function webpackOptions(config): WebpackOptions {
         style: libStylePath,
         view: viewPath,
         component: componentPath,
-        core: corePath
+        core: corePath,
+        icon: iconPath
       }
     },
     devServer: {
@@ -78,12 +84,17 @@ function webpackOptions(config): WebpackOptions {
         mobile: true,
         inject: false,
         appMountId: 'app',
-        scripts: [dllScriptPath('vendor'), dllScriptPath('hmr')]
+        scripts: [
+          dllScriptPath('vendor'),
+          dllScriptPath('hmr'),
+          dllScriptPath('icon')
+        ]
       }),
 
       // Dll lib link
       dllRefPlugin(distPath, 'vendor'),
       dllRefPlugin(distPath, 'hmr'),
+      dllRefPlugin(distPath, 'icon'),
 
       // Webpack hot module replacement runtime need named file
       new NamedModulesPlugin(),

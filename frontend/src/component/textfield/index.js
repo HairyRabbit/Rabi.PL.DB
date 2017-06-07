@@ -144,7 +144,12 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
           }
 
           // NOTE AutoComplete Bind `Tab` key
-          if (autocomplete && autocompleteValueDecode && evt.which === 9) {
+          if (
+            autocomplete &&
+            (autocompleteShadow || autocompleteList) &&
+            autocompleteValueDecode &&
+            evt.which === 9
+          ) {
             evt.preventDefault()
             const { display } = autocomplete
             if (display.length !== 0) {
