@@ -4,8 +4,9 @@
 
 import React from 'react'
 import debug from 'lib/debug-event-key'
+import bindHandle from 'lib/bind-native-eventhandle'
 import style from './style.css'
-import type { Type, AutoComplete } from './types'
+import type { Type, AutoComplete, PasswordOption } from './types'
 import Shadow from './view/Shadow'
 import AC from './view/AutoComplete'
 
@@ -13,11 +14,13 @@ type Prop<T> = {
   // STATE
   value: string,
   autocomplete?: AutoComplete<T>,
+  passwordOption: PasswordOption,
 
   // ACTION
   boundChange: Function,
   boundTurn?: Function,
   boundToggle?: Function,
+  boundTogglePasswordVisibility?: Function,
 
   // OPTIONS
   name: string,
@@ -38,9 +41,11 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
   const {
     value,
     autocomplete,
+    passwordOption,
     boundChange,
     boundTurn,
     boundToggle,
+    boundTogglePasswordVisibility,
 
     name,
     type,
@@ -53,7 +58,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
 
     onChange,
     onKeyDown,
-    onFocus,
+    //onFocus,
     onBlur,
 
     ...prop
@@ -61,8 +66,14 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
 
   const boundChangeWithType: Function = boundChange(type)
 
+  // Shadow
   function ShadowComponent(): ?React.Element<*> {
-    if (!(autocomplete && autocompleteShadow && autocompleteValueDecode)) {
+    if (
+      !(type !== 'password' &&
+        autocomplete &&
+        autocompleteShadow &&
+        autocompleteValueDecode)
+    ) {
       return null
     }
     const { display } = autocomplete
@@ -73,6 +84,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     )
   }
 
+  // AutoComplete
   function AutoCompleteComponent<T>(): ?React.Element<*> {
     if (!(autocomplete && autocompleteList)) {
       return null
@@ -98,49 +110,46 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
 
       <input
         value={value}
-        type="text"
+        type={matchType(props)}
         id={name}
         name={name}
         className={style.main}
         {...prop}
-        onFocus={evt => {
+        onFocus={bindHandle(props.onFocus, evt => {
           if (autocomplete && autocompleteList) {
             boundToggle(autocompleteValueDecode, true)
           }
-
-          if (typeof onFocus === 'function') {
-            onFocus(evt)
-          }
-        }}
-        onBlur={evt => {
+        })}
+        onBlur={bindHandle(props.onBlur, evt => {
           if (autocomplete && autocompleteList) {
             boundToggle(autocompleteValueDecode, false)
           }
           // TODO Auto push on blur
-
-          // Pass to native blur
-          if (typeof onBlur === 'function') {
-            onBlur(evt)
-          }
-        }}
-        onChange={evt => {
+        })}
+        onChange={bindHandle(props.onChange, evt => {
           boundChangeWithType(evt.target.value)
-
-          // Pass to native change
-          if (typeof onChange === 'function') {
-            onChange(evt)
-          }
-        }}
-        onKeyDown={evt => {
-          // Debugger
+        })}
+        onKeyDown={bindHandle(props.onKeyDown, evt => {
+          // NOTE Debugger
           if (process.env.NODE_ENV === 'development') {
             console.log(`TextField: ${name}\n` + debug(evt))
           }
 
-          // NOTE Build-in `C-l`
+          // NOTE Build-in `C-l` Clear input
           if (evt.ctrlKey && evt.which === 76) {
             evt.preventDefault()
             boundChangeWithType('')
+          }
+
+          // NOTE Build-in `C-/` Password type hidden/visible input
+          if (
+            type === 'password' &&
+            passwordOption &&
+            (evt.ctrlKey && evt.which === 191)
+          ) {
+            evt.preventDefault()
+            // TODO
+            boundTogglePasswordVisibility(!passwordOption.visibility)
           }
 
           // NOTE AutoComplete Bind `Tab` key
@@ -189,12 +198,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
           //     }
           //   }
           // }
-
-          // Pass to native keydown
-          if (typeof onKeyDown === 'function') {
-            onKeyDown(evt)
-          }
-        }}
+        })}
       />
     </div>
   )
@@ -212,4 +216,17 @@ function Icon() {
 
 function makeValue(value: string): { target: { value: string } } {
   return { target: { value: value } }
+}
+
+function matchType({ type, passwordOption }): string {
+  switch (type) {
+    case 'password': {
+      if (!passwordOption) {
+        return 'password'
+      }
+      return passwordOption.visibility ? 'text' : 'password'
+    }
+    default:
+      return 'text'
+  }
 }

@@ -33,8 +33,7 @@ export type ChangeValueAction<T> = {
   }
 }
 
-/* Auto complete */
-
+// auto-complete
 export const TurnActive: 'TurnSuggestActive' = 'TurnSuggestActive'
 export type TurnActiveAction = {
   type: typeof TurnActive,
@@ -52,40 +51,21 @@ export type ToggleListAction = {
   }
 }
 
-export const PushToAutoCompleteList: 'PushToAutoCompleteList' =
-  'PushToAutoCompleteList'
-export type PushToAutoCompleteListAction<T> = {
-  type: typeof PushToAutoCompleteList,
-  payload: T
-}
-
-export const RemoveAutoCompleteItem: 'RemoveAutoCompleteItem' =
-  'RemoveAutoCompleteItem'
-export type RemoveAutoCompleteItemAction<T> = {
-  type: typeof RemoveAutoCompleteItem,
-  payload: T
-}
-
-export const ActiveAutoCompleteItem: 'ActiveAutoCompleteItem' =
-  'ActiveAutoCompleteItem'
-export type ActiveAutoCompleteItemAction = {
-  type: typeof ActiveAutoCompleteItem,
-  payload: number
-}
-
-export const ResetAutoComplete: 'ResetAutoComplete' = 'ResetAutoComplete'
-export type ResetAutoCompleteAction = {
-  type: typeof ResetAutoComplete
+// password options
+export const TogglePasswordVisibility: 'TogglePasswordVisibility' =
+  'TogglePasswordVisibility'
+export type TogglePasswordVisibilityAction = {
+  type: typeof TogglePasswordVisibility,
+  payload: {
+    visibility: boolean
+  }
 }
 
 export type Action<T> =
   | ChangeValueAction<T>
   | TurnActiveAction
   | ToggleListAction
-  | PushToAutoCompleteListAction<T>
-  | RemoveAutoCompleteItemAction<T>
-  | ActiveAutoCompleteItemAction
-  | ResetAutoComplete
+  | TogglePasswordVisibilityAction
 
 /// MODEL
 
@@ -99,7 +79,28 @@ export type AutoComplete<T> = {
   display: Array<Display<T>>
 }
 
+export type PasswordStrength =
+  | 1 // week
+  | 2 // medium
+  | 3 // strong
+  | 4 // super
+
+export type PasswordError = {
+  tooShort: boolean,
+  noNumber: boolean,
+  noChar: boolean,
+  tooLong: boolean,
+  specialChar: boolean
+}
+
+export type PasswordOption = {
+  visibility: boolean,
+  strength: ?PasswordStrength,
+  error: ?PasswordError
+}
+
 export type Model<T> = {
   value: string,
-  autocomplete?: AutoComplete<T>
+  autocomplete?: AutoComplete<T>,
+  passwordOption?: PasswordOption
 }
