@@ -50,15 +50,14 @@ function constAction<A>(
   flag: string,
   namespace: string
 ): Function {
-  return function(): Function {
+  return function(): CombinedAction<A> | Function {
     const changedType: string = encodeActionType(namespace, flag, type)
     const actionCall: Object = actions[type].apply(null, arguments)
 
-    return function(dispatch: Dispatch, ...args: Array<*>): Function | void {
-      if (typeof actionCall !== 'function') {
-        return combineAction(actionCall, changedType)
-      }
-
+    if (typeof actionCall !== 'function') {
+      return combineAction(actionCall, changedType)
+    }
+    return function(dispatch: Dispatch, ...args: Array<*>): void {
       actionCall.apply(null, [warppedDispatch(dispatch, changedType), ...args])
     }
   }
@@ -85,7 +84,8 @@ function mapToComponentAction<A>(
   flag: string,
   namespace: string
 ): CombinedActions<A> {
-  return Object.keys(actions).reduce(foldAction.apply(null, arguments), {})
+  const folder = foldAction.apply(null, arguments)
+  return Object.keys(actions).reduce(folder, {})
 }
 
 export default mapToComponentAction
