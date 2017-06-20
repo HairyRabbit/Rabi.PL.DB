@@ -1,0 +1,50 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+@value left-width from '../../style.css';
+
+.container {
+  composes: position-fill from 'style/position-fill.css';
+  top: 100%;
+  background: #f0f0f0;
+}
+
+.list {
+  composes: list-reset from 'style/list-reset.css';
+}
+
+.nextlist {
+  bottom: 1px solid #ddd;
+}
+
+.left {
+  composes: left from '../../style.css';
+}
+
+.circle {
+  composes: circle from '../../style.css';
+  size: 0.5rem;
+}
+
+.item {
+  position: relative;
+}
+
+.main {
+  composes: main from '../../style.css';
+  padding: 0.25rem 1rem;
+  padding-left: 2.5rem;
+}
+
+.item.active .circle {
+  background: #B25B66;
+}
+
+.item.completed .circle {
+  background: #94D9BB;  
+}
+
+.item.completed .main {
+  text-decoration: line-through;
+  color: var(--gray2);
+}

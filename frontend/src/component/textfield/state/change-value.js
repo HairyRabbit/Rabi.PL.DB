@@ -23,8 +23,10 @@ export function mapToDisplay<T>(item: T, idx: number): Display<T> {
 
 export function matched<T>(decode: T => string, value: string): Function {
   return function(item: T): boolean {
-    const regex: RegExp = new RegExp(`^${value}`)
-    return Boolean(decode(item).match(regex))
+    const regex: RegExp = new RegExp(
+      `^${value.replace(/(\[|\]|\(|\))/g, '\\$1')}`
+    )
+    return Boolean(item.match(regex))
   }
 }
 
@@ -36,14 +38,14 @@ function changeValue<T>(
   var model: Model<T> = model
 
   // value no changed
-  if (value === model.value) {
+  if (value === null || value === model.value) {
     return model
   }
 
   // password options
   const passopt: ?PasswordOption = model.passwordOption
   if (passopt) {
-    console.log(action.payload.error)
+    console.log(action.payload.strength, action.payload.error)
     model = {
       ...model,
       passwordOption: {

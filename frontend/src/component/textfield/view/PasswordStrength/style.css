@@ -1,0 +1,6 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+.container {
+  composes: left from '../../style.css';
+}

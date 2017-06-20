@@ -4,6 +4,9 @@
 
 /// TYPES
 
+import type { PasswordStrength } from 'lib/mapto-password-strength'
+import type { PasswordError } from 'lib/mapto-password-error'
+
 export type Type =
   | 'text'
   | 'password'
@@ -79,24 +82,10 @@ export type AutoComplete<T> = {
   display: Array<Display<T>>
 }
 
-export type PasswordStrength =
-  | 1 // week
-  | 2 // medium
-  | 3 // strong
-  | 4 // super
-
-export type PasswordError = {
-  tooShort: boolean,
-  noNumber: boolean,
-  noChar: boolean,
-  tooLong: boolean,
-  specialChar: boolean
-}
-
 export type PasswordOption = {
   visibility: boolean,
   strength: ?PasswordStrength,
-  error: ?PasswordError
+  error: PasswordError
 }
 
 export type Model<T> = {

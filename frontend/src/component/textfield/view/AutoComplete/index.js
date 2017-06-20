@@ -4,8 +4,9 @@
 
 import React from 'react'
 import style from './style.css'
-import HighLight from '../HighLight'
-import Render from '../Render'
+// import HighLight from '../HighLight'
+// import Render from '../Render'
+import AutoCompleteRender from '../AutoCompleteRender'
 
 type Prop<T> = {
   children?: Array<T>,
@@ -13,14 +14,32 @@ type Prop<T> = {
   value: string,
   highlight: boolean,
   decode?: T => string,
-  onSelect?: Function
+  onSelect?: Function,
+  customRender?: React.Element<*>,
+  customItemRender?: React.Element<*>
 }
 
 function AutoComplete<T>(props: Prop<T>): React.Element<*> {
-  const { children, render, value, highlight, decode, onSelect } = props
-  const Component = render || Render
+  const {
+    children,
+    render,
+    value,
+    highlight,
+    decode,
+    onSelect,
+    customRender,
+    customItemRender
+  } = props
+  // const Component = render || Render
+  const Render = customRender || AutoCompleteRender
   return (
     <div className={style.container}>
+      {children && Array.isArray(children) && children.length !== 0
+        ? <Render onSelect={onSelect} customItemRender={customItemRender}>
+            {children}
+          </Render>
+        : null}
+      {/*
       <ul className={style.list}>
         {children && children.length !== 0
           ? children.map((item, idx) => (
@@ -43,6 +62,7 @@ function AutoComplete<T>(props: Prop<T>): React.Element<*> {
             ))
           : null}
       </ul>
+       */}
     </div>
   )
 }

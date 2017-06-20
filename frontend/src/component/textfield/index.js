@@ -9,12 +9,17 @@ import style from './style.css'
 import type { Type, AutoComplete, PasswordOption } from './types'
 import Shadow from './view/Shadow'
 import AC from './view/AutoComplete'
+import PasswordHelper from './view/PasswordHelper'
+import PasswordStrength from './view/PasswordStrength'
+import Map from './view/Map'
+
+type AutocompleteProp = boolean | 'list' | 'shadow'
 
 type Prop<T> = {
   // STATE
   value: string,
   autocomplete?: AutoComplete<T>,
-  passwordOption: PasswordOption,
+  passwordOption?: PasswordOption,
 
   // ACTION
   boundChange: Function,
@@ -32,6 +37,9 @@ type Prop<T> = {
   autocompleteRender?: React.Element<*>,
   autocompleteHighlight?: boolean,
   autocompleteShadow?: boolean,
+
+  // OPTIONS.CityType
+  map: boolean,
 
   // OPTIONS.native
   prop: Array<any>
@@ -56,10 +64,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     autocompleteHighlight,
     autocompleteShadow,
 
-    onChange,
-    onKeyDown,
-    //onFocus,
-    onBlur,
+    map,
 
     ...prop
   } = props
@@ -69,10 +74,12 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
   // Shadow
   function ShadowComponent(): ?React.Element<*> {
     if (
-      !(type !== 'password' &&
+      !(
+        type !== 'password' &&
         autocomplete &&
         autocompleteShadow &&
-        autocompleteValueDecode)
+        autocompleteValueDecode
+      )
     ) {
       return null
     }
@@ -92,14 +99,33 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
     return (
       <AC
         render={autocompleteRender}
-        highlight={autocompleteHighlight}
+        highlight={Boolean(autocompleteHighlight)}
         value={value}
         decode={autocompleteValueDecode}
         onSelect={boundChangeWithType}
+        customRender={props => <Map {...props} width={200} height={200} />}
       >
         {autocomplete.display}
       </AC>
     )
+  }
+
+  // Password Helper
+  function PasswordHelperComponent(): ?React.Element<*> {
+    if (!passwordOption) {
+      return null
+    }
+
+    return <PasswordHelper errors={passwordOption.error} />
+  }
+
+  // Password Strength
+  function PasswordStrengthComponent(): ?React.Element<*> {
+    if (!(passwordOption && passwordOption.strength)) {
+      return null
+    }
+
+    return <PasswordStrength strength={passwordOption.strength} />
   }
 
   return (
@@ -107,6 +133,8 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
       <Icon />
       <AutoCompleteComponent />
       <ShadowComponent />
+      <PasswordHelperComponent />
+      <PasswordStrengthComponent />
 
       <input
         value={value}
@@ -115,21 +143,45 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
         name={name}
         className={style.main}
         {...prop}
-        onFocus={bindHandle(props.onFocus, evt => {
-          if (autocomplete && autocompleteList) {
+        onFocus={bindHandle(prop.onFocus, evt => {
+          if (autocomplete && autocompleteList && boundToggle) {
             boundToggle(autocompleteValueDecode, true)
           }
         })}
-        onBlur={bindHandle(props.onBlur, evt => {
-          if (autocomplete && autocompleteList) {
+        onBlur={bindHandle(prop.onBlur, evt => {
+          if (autocomplete && autocompleteList && boundToggle) {
             boundToggle(autocompleteValueDecode, false)
+          }
+          if (type === 'number') {
+            if (value === '-') {
+              boundChangeWithType('0')
+            }
           }
           // TODO Auto push on blur
         })}
-        onChange={bindHandle(props.onChange, evt => {
+        onChange={bindHandle(prop.onChange, evt => {
           boundChangeWithType(evt.target.value)
         })}
-        onKeyDown={bindHandle(props.onKeyDown, evt => {
+        onWheel={bindHandle(prop.onWheel, evt => {
+          // NOTE Build-in Change numbe value
+          if (type === 'number') {
+            evt.preventDefault()
+            const val: number = Number(evt.target.value)
+            const { step, min, max, reverse } = prop
+            const computeVal: number = keepNumber(
+              fineTuneNumberOnWhell(evt, val, Boolean(reverse), step)
+            )
+            let scopeVal: number = computeVal
+            if (min !== undefined) {
+              scopeVal = Math.max(min, scopeVal)
+            }
+            if (max !== undefined) {
+              scopeVal = Math.min(max, scopeVal)
+            }
+            boundChangeWithType(String(scopeVal))
+          }
+        })}
+        onKeyDown={bindHandle(prop.onKeyDown, evt => {
           // NOTE Debugger
           if (process.env.NODE_ENV === 'development') {
             console.log(`TextField: ${name}\n` + debug(evt))
@@ -145,6 +197,7 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
           if (
             type === 'password' &&
             passwordOption &&
+            boundTogglePasswordVisibility &&
             (evt.ctrlKey && evt.which === 191)
           ) {
             evt.preventDefault()
@@ -180,26 +233,11 @@ export function TextField<T>(props: Prop<T>): React.Element<*> {
             const dir: number = evt.which === 38 ? -1 : 1
             boundTurn(dir)
           }
-
-          // SPC helper key, auto fill
-          // if (evt.which === 32 && type === 'ipv4') {
-          //   const value: string = evt.target.value
-          //   const key: string = evt.target.key
-
-          //   switch (type) {
-          //     case 'ipv4': {
-          //       let spcIdx = value.indexOf(' ')
-          //       boundOnChange(makeValue(value + ' .'))
-          //       break
-          //     }
-
-          //     default: {
-          //       break
-          //     }
-          //   }
-          // }
         })}
       />
+
+      {/**/}
+
     </div>
   )
 }
@@ -229,4 +267,39 @@ function matchType({ type, passwordOption }): string {
     default:
       return 'text'
   }
+}
+
+function fineTuneNumberOnWhell(
+  evt: Event,
+  value: number,
+  reverse: boolean,
+  step?: number
+): number {
+  function mapToValue(multiple: number): number {
+    return (!reverse ? evt.deltaY < 0 : evt.deltaY > 0)
+      ? value + multiple
+      : value - multiple
+  }
+
+  switch (true) {
+    case Boolean(step): {
+      return mapToValue(step)
+    }
+    case evt.ctrlKey: {
+      return mapToValue(100)
+    }
+    case evt.shiftKey: {
+      return mapToValue(10)
+    }
+    case evt.altKey: {
+      return mapToValue(0.1)
+    }
+    default: {
+      return mapToValue(1)
+    }
+  }
+}
+
+function keepNumber(value: number): number {
+  return Number(value.toFixed(12))
 }

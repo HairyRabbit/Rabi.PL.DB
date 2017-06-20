@@ -15,7 +15,7 @@ export default function Icon({ name, size = '1rem' }) {
     //const icons = require(`style/iconfont`)
     return (
       <span
-        className={classnames(style.icon, icons.container, icons[name])}
+        className={[style.icon, icons.container, icons[name]].join(' ')}
         style={fixedSize}
       />
     )

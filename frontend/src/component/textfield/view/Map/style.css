@@ -1,0 +1,24 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+@value width: 200px;
+@value height: 200px;
+
+.part {
+  fill: #ddd;
+}
+
+.part:hover,
+.active {
+  fill: #803C80;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+
+

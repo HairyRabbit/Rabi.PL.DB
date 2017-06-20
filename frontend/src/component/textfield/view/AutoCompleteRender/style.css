@@ -1,0 +1,6 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+.container {
+  composes: list-reset from 'style/list-reset.css';
+}
