@@ -1,0 +1,10 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+:global(.amap-logo) {
+  display: none !important;
+}
+
+:global(.amap-copyright) {
+  display: none !important;
+}
