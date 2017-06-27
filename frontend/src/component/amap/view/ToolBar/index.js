@@ -4,91 +4,114 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import bindEvents from '../../lib/bind-events'
+import type { MapComponent } from '../../lib/base-interface'
+import Marker from '../Marker'
 
 type Prop = {
   position: 'LT' | 'RT' | 'LB' | 'RB',
   ruler: boolean,
   locate: boolean,
   direction: boolean,
-  disable: boolean,
+  disabled: boolean,
+  locationMarker: Marker,
+  onShow: Function,
+  onHide: Function,
+  onLocation: Function,
+  onZoomChanged: Function,
   children?: React.Element<*>
 }
 
-class ToolBar extends Component {
+class ToolBar extends Component implements MapComponent {
   props: Prop
   context: Context
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.disabled !== this.props.disabled) {
-      if (Boolean(nextProps.disabled)) {
-        this.toolbar.hide()
-      } else {
-        this.toolbar.show()
-      }
-    }
+    const { toolbar } = this
 
-    const keys = Object.keys(nextProps)
-    keys.filter(key => nextProps !== this.props).forEach(key => {
-      if (key === 'disabled') {
-        if (Boolean(nextProps.disabled)) {
-          this.toolbar.hide()
-        } else {
-          this.toolbar.show()
+    const keys: string = Object.keys(nextProps)
+      .filter(x => !/^(on|children)/.test(x))
+      .filter(key => nextProps !== this.props)
+      .forEach(key => {
+        if (key === 'disabled') {
+          if (Boolean(nextProps.disabled)) {
+            toolbar.hide()
+          } else {
+            toolbar.show()
+          }
+          return
         }
-        return
-      }
 
-      const upperFirstKey = key.replace(/(.)/, (_, a) => a.toUpperCase())
-      const process =
-        (Boolean(nextProps[key]) ? 'show' : 'hide') + upperFirstKey
-      this.toolbar[process]()
-    })
+        const upperFirstKey: string = key.replace(/(.)/, (_, a) =>
+          a.toUpperCase()
+        )
+        const process: string =
+          (Boolean(nextProps[key]) ? 'show' : 'hide') + upperFirstKey
+
+        toolbar[process] && toolbar[process]()
+      })
   }
   componentDidMount() {
     if (!AMap.ToolBar) {
       AMap.plugin('AMap.ToolBar', this.load.bind(this))
-      return
+    } else {
+      this.load()
     }
-    this.load()
   }
   load() {
-    const { map } = this.context
+    const { AMap, map } = this.context
     const {
       position,
       ruler,
       locate,
       direction,
       autoPosition,
+      disabled,
+      children,
 
-      onToggle,
+      onShow,
+      onHide,
       onLocation,
       onZoomChanged
     } = this.props
 
-    this.toolbar = new AMap.ToolBar({
-      position,
-      ruler,
-      locate,
-      direction,
-      autoPosition
-    })
+    let locationMarker = undefined
 
-    // const evt = AMap.event.addListener(
-    //   map,
-    //   mapToMapEvent(key),
-    //   this.props[key]
-    // )
-    // this.events.push(evt)
-
-    if (disabled) {
-      this.toolbar.hide()
+    if (children) {
+      const marker = new children.type(children.props, this.context)
+      marker.load()
+      locationMarker = marker.marker
     }
-    map.addControl(this.toolbar)
+
+    const toolbar = (this.toolbar = new AMap.ToolBar({
+      position,
+      ruler: ruler === undefined ? true : ruler,
+      locate,
+      direction: direction === undefined ? true : direction,
+      autoPosition,
+      locationMarker
+    }))
+
+    // NOTE toolbar visible
+    if (disabled) {
+      toolbar.hide()
+    }
+
+    this.events = bindEvents(AMap, toolbar, this.props)
+    map.addControl(toolbar)
   }
   componentWillUnmount() {
-    const { map } = this.context
-    map.removeControl(this.toolbar)
+    const { AMap, map } = this.context
+    const { toolbar, events } = this
+
+    map.removeControl(toolbar)
+
+    Object.keys(events).forEach(key => {
+      AMap.event.removeListener(events[key])
+      delete events[key]
+    })
   }
+
   render() {
     return null
   }

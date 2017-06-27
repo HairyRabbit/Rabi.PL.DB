@@ -87,10 +87,6 @@ function mapToMapEvent(event: MapEvent): string {
   return normalizeMapEvent(event).slice(2).toLowerCase()
 }
 
-function filterMapEventByProps(props: Prop): Array<MapEvent> {
-  return Object.keys(props).filter(x => MapEventList.indexOf(x) > -1)
-}
-
 type Prop = MapOptions | MapEvent
 
 const ValidMapOptions = {
@@ -140,47 +136,50 @@ class Map extends Component {
     }
 
     if (nextProps.center !== this.props.center) {
-      if (isLngLat(nextProps)) {
-        this.map.setCenter(nextProps)
+      if (typeof nextProps.center !== 'string') {
+        this.map.setCenter(nextProps.center)
       } else {
-        this.map.setCity(nextProps)
+        this.map.setCity(nextProps.center)
       }
     }
   }
   componentDidMount() {
-    loadMap('417f3e40ffc0d21033841526e3116387').then(AMap => {
-      let options = {}
-      let events = []
+    loadMap('417f3e40ffc0d21033841526e3116387')
+      .then(AMap => {
+        let options = {}
+        let events = []
 
-      Object.keys(this.props).forEach(key => {
-        console.log(key, ValidMapOptions[key])
-        if (ValidMapOptions[key]) {
-          options[key] = this.props[key]
-        }
+        Object.keys(this.props).forEach(key => {
+          if (ValidMapOptions[key]) {
+            options[key] = this.props[key]
+          }
 
-        if (ValidMapEvent[key]) {
-          events.push(key)
-        }
+          if (ValidMapEvent[key]) {
+            events.push(key)
+          }
+        })
+
+        const map = new AMap.Map(this.container, {
+          ...options,
+          mapStyle: 'amap://styles/whitesmoke'
+        })
+
+        events.forEach(key => {
+          const evt = AMap.event.addListener(
+            map,
+            mapToMapEvent(key),
+            this.props[key]
+          )
+          this.events.push(evt)
+        })
+
+        this.AMap = AMap
+        this.map = map
+        this.setState({ mount: true })
       })
-
-      const map = new AMap.Map(this.container, {
-        ...options,
-        mapStyle: 'amap://styles/whitesmoke'
+      .catch(err => {
+        throw err
       })
-
-      events.forEach(key => {
-        const evt = AMap.event.addListener(
-          map,
-          mapToMapEvent(key),
-          this.props[key]
-        )
-        this.events.push(evt)
-      })
-
-      this.AMap = AMap
-      this.map = map
-      this.setState({ mount: true })
-    })
   }
   componentWillUnmount() {
     this.events.forEach(evt => {

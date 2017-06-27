@@ -4,7 +4,13 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import type { LngLat, Pixel, Bounds, MapsEvent } from '../../lib/base-interface'
+import type {
+  MapComponent,
+  LngLat,
+  Pixel,
+  Bounds,
+  MapsEvent
+} from '../../lib/base-interface'
 
 type Prop = {
   position: LngLat,
@@ -34,14 +40,13 @@ type Prop = {
   }
 }
 
-class Marker extends Component {
+class Marker extends Component implements MapComponent {
   props: Prop
   context: Context
 
-  constructor(props, context) {
-    super(props, context)
-    const { position } = props
-    const { AMap, map } = context
+  load() {
+    const { position } = this.props
+    const { AMap, map } = this.context
     this.marker = new AMap.Marker({
       position: position
     })
@@ -49,6 +54,8 @@ class Marker extends Component {
 
   componentDidMount() {
     const { map } = this.context
+
+    this.load()
     map.add(this.marker)
   }
   componentWillUnmount() {

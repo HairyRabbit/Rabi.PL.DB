@@ -53,3 +53,9 @@ export interface HotSpotEvent {
   name: string,
   id: string
 }
+
+export interface MapComponent {
+  map: Object,
+  AMap: Object,
+  load(): Object
+}
