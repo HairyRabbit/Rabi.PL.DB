@@ -19,18 +19,6 @@ import svgicons2svgfont from 'svgicons2svgfont'
 import streamToPromise from 'stream-to-promise'
 import mapToFilename from './map-filepath-to-modulefile'
 
-function uint8Arr(buffer) {
-  return new Uint8Array(buffer)
-}
-
-function buffer(buf) {
-  return new Buffer(buf)
-}
-
-function filename(file: string): string {
-  return path.basename(file, path.extname(file))
-}
-
 type SvgIconsOptions = {
   fontName: string,
   normalize: boolean,
@@ -51,148 +39,222 @@ const svgIconsOptions: SvgIconsOptions = {
   log: () => {}
 }
 
-function makeMate(start) {
-  return function(icon, idx) {
-    return {
-      name: pickname(icon),
-      path: icon,
-      //endpoint: `\\${(start + idx).toString(16)}`
-      endpoint: start + idx
-    }
+// const SVGERROR: Error = new Error(`Can't set svg`)
+// const TTFERROR: Error = new Error(`Can't set ttf`)
+
+// function svg(stream: fs.WriteStream): Function {
+//   return function(options: Options): Promise<Options> {
+//     return new Promise((resolve, reject) => {
+//       streamToPromise(stream)
+//         .then(buffer => {
+//           options.svg = buffer
+//           resolve(options)
+//         })
+//         .catch(reject)
+//     })
+//   }
+// }
+
+// function ttf(options: Options): Promise<Options> {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       if(options.svg) {
+//         options.ttf = buffer(svg2ttf(options.svg.toString(), {}).buffer)
+//         resolve(options)
+//       } else {
+//         reject(SVGERROR)
+//       }
+//     } catch (err) {
+//       reject(err)
+//     }
+//   })
+// }
+
+// function eot(options: Options): Promise<Options> {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       if(options.ttf) {
+//         options.eot = buffer(ttf2eot(uint8Arr(options.ttf)).buffer)
+//         resolve(options)
+//       } else {
+//         reject(TTFERROR)
+//       }
+//     } catch (err) {
+//       reject(err)
+//     }
+//   })
+// }
+
+// function woff(options: Options): Promise<Options> {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       if(options.ttf) {
+//         options.woff = buffer(ttf2woff(uint8Arr(options.ttf)).buffer)
+//         resolve(options)
+//       } else {
+//         reject(TTFERROR)
+//       }
+//     } catch (err) {
+//       reject(err)
+//     }
+//   })
+// }
+
+// function woff2(options: Options): Promise<Options> {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       if(options.ttf) {
+//         options.woff2 = buffer(ttf2woff2(options.ttf))
+//         resolve(options)
+//       } else {
+//         reject(TTFERROR)
+//       }
+//     } catch (err) {
+//       reject(err)
+//     }
+//   })
+// }
+
+type IconPluginProp = {
+  outputFileName: string,
+  icons: $PropertyType<Icons, 'icons'>
+}
+
+type IconProp = {
+  name: string,
+  path: string
+}
+
+interface Icons {
+  icons: Array<IconProp>
+}
+
+class IconPlugin implements Icons {
+  outputFileName: string
+
+  icons: $PropertyType<Icons, 'icons'>
+
+  startPoint: number = 0xe000
+
+  stream: fs.WriteStream
+
+  iconBuffers: {
+    svg: Buffer,
+    ttf: Buffer,
+    eot: Buffer,
+    woff: Buffer,
+    woff2: Buffer
   }
-}
 
-type Options = {
-  svg?: Buffer,
-  ttf?: Buffer,
-  eot?: Buffer,
-  woff?: Buffer,
-  woff2?: Buffer
-}
+  constructor(options: IconPluginProp) {
+    this.outputFileName = options.outputFileName
+    this.icons = options.icons
+  }
 
-function svg(stream: Steam): Function {
-  return function(options: Options): Promise<Options> {
-    return new Promise((resolve, reject) => {
-      streamToPromise(stream)
-        .then(buffer => {
-          options.svg = buffer
-          resolve(options)
-        })
-        .catch(reject)
+  makeAssets(compilation: Object): void {
+    Object.keys(this.iconBuffers).forEach(key => {
+      compilation.assets[`${this.outputFileName}.${key}`] = {
+        source: () => this.iconBuffers[key],
+        size: () => this.iconBuffers[key].length
+      }
     })
   }
-}
 
-function ttf(options: Options): Promise<Options> {
-  return new Promise((resolve, reject) => {
-    try {
-      options.ttf = buffer(svg2ttf(options.svg.toString(), {}).buffer)
-      resolve(options)
-    } catch (err) {
-      reject(err)
-    }
-  })
-}
-
-function eot(options: Options): Promise<Options> {
-  return new Promise((resolve, reject) => {
-    try {
-      options.eot = buffer(ttf2eot(uint8Arr(options.ttf)).buffer)
-      resolve(options)
-    } catch (err) {
-      reject(err)
-    }
-  })
-}
-
-function woff(options: Options): Promise<Options> {
-  return new Promise((resolve, reject) => {
-    try {
-      options.woff = buffer(ttf2woff(uint8Arr(options.ttf)).buffer)
-      resolve(options)
-    } catch (err) {
-      reject(err)
-    }
-  })
-}
-
-function woff2(options: Options): Promise<Options> {
-  return new Promise((resolve, reject) => {
-    try {
-      options.woff2 = buffer(ttf2woff2(options.ttf))
-      resolve(options)
-    } catch (err) {
-      reject(err)
-    }
-  })
-}
-
-const stream: Stream = svgicons2svgfont(svgIconsOptions)
-
-class IconPlugin {
-  constructor(options) {
-    this.outputPath = options.outputPath
-    this.outputName = options.outputName
+  makeSvgFontStream() {
+    this.stream = svgicons2svgfont({
+      fontName: this.outputFileName,
+      normalize: true,
+      centerHorizontally: true,
+      fixedWidth: false,
+      fontHeight: 1000,
+      fontWeight: 1000,
+      log: () => {}
+    })
   }
 
-  apply(compiler): void {
-    const outputPath: string = this.outputPath
-    const outputName: string = this.outputName
-    const startPoiot: number = 0xe000
-    const svgFiles: Array<string> = mapToFilename('feather/icons', '**/*.svg')
-    const len: number = svgFiles.length
+  makeSVGBuffer(cb: Function): void {
+    streamToPromise(this.stream).then(buffer => {
+      this.iconBuffers.svg = buffer
+      this.makeTTFBuffer(cb)
+    })
+  }
 
-    compiler.plugin('emit', function(compilation, callback) {
-      function output(options: Options): void {
-        Object.keys(options).forEach(key => {
-          console.log(key)
-          const outputFileName: string = `${outputPath}/${outputName}.${key}`
-          console.log(outputFileName)
-          compilation.assets[outputFileName] = {
-            source: function() {
-              return options[key]
-            },
-            size: function() {
-              return options[key].length
-            }
-          }
-        })
+  makeTTFBuffer(cb: Function): void {
+    const buf = buffer(svg2ttf(this.iconBuffers.svg.toString(), {}).buffer)
+    this.iconBuffers.ttf = buf
+    this.makeEOTBuffer()
+    this.makeWOFFBuffer()
+    this.makeWOFF2Buffer()
 
-        console.log(compilation.assets)
+    cb && cb()
+  }
+
+  makeEOTBuffer(): void {
+    const buf = buffer(ttf2eot(uint8Arr(this.iconBuffers.ttf)).buffer)
+    this.iconBuffers.eot = buf
+  }
+
+  makeWOFFBuffer(): void {
+    const buf = buffer(ttf2woff(uint8Arr(this.iconBuffers.ttf)).buffer)
+    this.iconBuffers.woff = buf
+  }
+
+  makeWOFF2Buffer(): void {
+    const buf = buffer(ttf2woff2(this.iconBuffers.ttf))
+    this.iconBuffers.woff2 = buf
+  }
+
+  makeCSSBuffer(): void {}
+
+  writeToStream(cb: Function): void {
+    this.icons.forEach((icon: IconProp, idx: number): void => {
+      // const icon = {
+      //   // FIXME directory-filename
+      //   name: filename(filepath),
+      //   path: path.resolve(__dirname, 'node_modules', filepath),
+      //   endpoint: this.startPoiot + idx
+      // }
+
+      const glyph: any = fs.createReadStream(icon.path)
+
+      glyph.metadata = {
+        // TODO ligature supports.
+        unicode: [String.fromCharCode(this.startPoint + idx)],
+        name: icon.name
       }
 
-      Promise.resolve({})
-        .then(svg(stream))
-        .then(ttf)
-        .then(eot)
-        .then(woff)
-        .then(woff2)
-        .then(output)
-        .then(function() {
-          callback()
-          return null
-        })
+      this.stream.write(glyph)
+    })
 
-      svgFiles.forEach((filepath, idx) => {
-        const icon = {
-          name: filename(filepath),
-          path: path.resolve(__dirname, 'node_modules', filepath),
-          endpoint: startPoiot + idx
-        }
-        const glyph: ReadStream = fs.createReadStream(icon.path)
+    cb && cb()
+  }
 
-        glyph.metadata = {
-          // TODO ligature supports.
-          unicode: [String.fromCharCode(icon.endpoint)],
-          name: icon.name
-        }
+  apply(compiler: Object): void {
+    this.makeSvgFontStream()
 
-        stream.write(glyph)
+    compiler.plugin('emit', (compilation: Object, callback: Function): void => {
+      this.makeSVGBuffer(() => {
+        this.makeAssets(compilation)
+        callback()
       })
 
-      stream.end()
+      this.writeToStream(() => this.stream.end())
     })
   }
 }
 
 export default IconPlugin
+
+/// HELPER
+
+function uint8Arr(buffer: Buffer): Uint8Array {
+  return new Uint8Array(buffer)
+}
+
+function buffer(buf: string): Buffer {
+  return new Buffer(buf)
+}
+
+function filename(file: string): string {
+  return path.basename(file, path.extname(file))
+}

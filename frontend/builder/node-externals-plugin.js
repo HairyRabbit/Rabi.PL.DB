@@ -20,9 +20,10 @@ class NodeExternalsPlugin {
       cmp.apply(new ExternalsPlugin('commonjs', nodeExternals(this.options)))
     })
     compiler.plugin('after-environment', function() {
-      this.options.node.__dirname = false
-      this.options.node.__filename = false
-      this.options.node.process = false
+      this.options.node = false
+      // this.options.node.__dirname = false
+      // this.options.node.__filename = false
+      // this.options.node.process = false
     })
   }
 }

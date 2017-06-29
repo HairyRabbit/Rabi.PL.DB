@@ -2,7 +2,8 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-import React, { Component } from 'react'
+import React, { Component, isValidElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import PropTypes from 'prop-types'
 import bindEvents from '../../lib/bind-events'
 import type { MapComponent, LngLat, Pixel } from '../../lib/base-interface'
@@ -28,13 +29,36 @@ class InfoWindow extends Component implements MapComponent {
 
   load() {
     const { AMap, map } = this.context
-    const { isCustom, autoMove, closeWhenClickMap, children } = this.props
-    this.infowindow = new AMap.InfoWindow({
+    const {
       isCustom,
       autoMove,
       closeWhenClickMap,
-      content: children
+      position,
+      children
+    } = this.props
+    this.infowindow = new AMap.InfoWindow({
+      isCustom,
+      autoMove,
+      position,
+      closeWhenClickMap,
+      content: setContent(children)
     })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { map } = this.context
+    const { infowindow } = this
+
+    if (nextProps.position !== this.props.position) {
+      infowindow.setPosition(nextProps.position)
+    }
+
+    // TODO always set children
+    nextProps.children && infowindow.setContent(setContent(nextProps.children))
+  }
+
+  shouldComponentUpdate() {
+    return false
   }
 
   componentDidMount() {
@@ -45,7 +69,7 @@ class InfoWindow extends Component implements MapComponent {
     if (disabled) {
       this.infowindow.close()
     } else {
-      this.infowindow.open(map, position)
+      this.infowindow.open(map)
     }
     this.events = bindEvents(AMap, this.infowindow, this.props)
   }
@@ -68,6 +92,13 @@ class InfoWindow extends Component implements MapComponent {
 InfoWindow.contextTypes = {
   AMap: PropTypes.object,
   map: PropTypes.object
+}
+
+function setContent(content: any): ?string {
+  return (
+    content &&
+    (isValidElement(content) ? renderToStaticMarkup(content) : String(content))
+  )
 }
 
 export default InfoWindow

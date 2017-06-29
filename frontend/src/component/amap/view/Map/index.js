@@ -6,69 +6,8 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import loadMap from '../../lib/load-map'
 import mapPositionToLngLat from '../../lib/map-position-to-lnglat'
+import bindEvents from '../../lib/bind-events'
 import style from './style.css'
-
-type MapOptions = {
-  zoom: number,
-  center: LngLat
-}
-
-type MapEvent =
-  | 'onClick'
-  | 'onDoubleClick'
-  | 'onContextMenu'
-  | 'onMouseMove'
-  | 'onMouseWheel'
-  | 'onMouseOver'
-  | 'onMouseOut'
-  | 'onMouseUp'
-  | 'onMouseDown'
-  | 'onTouchStart'
-  | 'onTouchMove'
-  | 'onTouchEnd'
-  | 'onComplete'
-  | 'onMapMove'
-  | 'onMoveStart'
-  | 'onMoveEnd'
-  | 'onZoomChange'
-  | 'onZoomStart'
-  | 'onZoomEnd'
-  | 'onDragStart'
-  | 'onDrag'
-  | 'onDragEnd'
-  | 'onResize'
-  | 'onHotSpotClick'
-  | 'onHotSpotOver'
-  | 'onHotSpotOut'
-
-const MapEventList: Array<MapEvent> = [
-  'onClick',
-  'onDoubleClick',
-  'onContextMenu',
-  'onMouseMove',
-  'onMouseWheel',
-  'onMouseOver',
-  'onMouseOut',
-  'onMouseUp',
-  'onMouseDown',
-  'onTouchStart',
-  'onTouchMove',
-  'onTouchEnd',
-  'onComplete',
-  'onMapMove',
-  'onMoveStart',
-  'onMoveEnd',
-  'onZoomChange',
-  'onZoomStart',
-  'onZoomEnd',
-  'onDragStart',
-  'onDrag',
-  'onDragEnd',
-  'onResize',
-  'onHotSpotClick',
-  'onHotSpotOver',
-  'onHotSpotOut'
-]
 
 function normalizeMapEvent(event: MapEvent): string {
   switch (event) {
@@ -87,48 +26,16 @@ function mapToMapEvent(event: MapEvent): string {
   return normalizeMapEvent(event).slice(2).toLowerCase()
 }
 
-type Prop = MapOptions | MapEvent
-
-const ValidMapOptions = {
-  zoom: true,
-  center: true
-}
-
-const ValidMapEvent = {
-  onClick: true,
-  onDoubleClick: true,
-  onContextMenu: true,
-  onMouseMove: true,
-  onMouseWheel: true,
-  onMouseOver: true,
-  onMouseOut: true,
-  onMouseUp: true,
-  onMouseDown: true,
-  onTouchStart: true,
-  onTouchMove: true,
-  onTouchEnd: true,
-  onComplete: true,
-  onMapMove: true,
-  onMoveStart: true,
-  onMoveEnd: true,
-  onZoomChange: true,
-  onZoomStart: true,
-  onZoomEnd: true,
-  onDragStart: true,
-  onDrag: true,
-  onDragEnd: true,
-  onResize: true,
-  onHotSpotClick: true,
-  onHotSpotOver: true,
-  onHotSpotOut: true
-}
-
 class Map extends Component {
   constructor(props: Prop) {
     super(props)
     this.state = { mount: false }
     this.events = []
-    this.AMap = this.map = null
+    this.AMap = null
+    this.map = null
+  }
+  checkInfoWindow() {
+    // TODO
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.zoom !== this.props.zoom) {
@@ -139,51 +46,52 @@ class Map extends Component {
       if (typeof nextProps.center !== 'string') {
         this.map.setCenter(nextProps.center)
       } else {
-        this.map.setCity(nextProps.center)
+        mapLocationToPosition(nextProps.center).then(location => {
+          if (location) {
+            this.map.setCenter(location.position)
+          }
+        })
       }
     }
   }
+
+  load() {
+    const { center, zoom } = this.props
+
+    return new Promise((resolve, reject) => {
+      mapLocationToPosition(center)
+        .then(location => {
+          this.map = new AMap.Map(this.container, {
+            center: location && location.position,
+            zoom,
+            mapStyle: 'amap://styles/whitesmoke'
+          })
+        })
+        .then(resolve)
+        .catch(reject)
+    })
+  }
   componentDidMount() {
-    loadMap('417f3e40ffc0d21033841526e3116387')
-      .then(AMap => {
-        let options = {}
-        let events = []
-
-        Object.keys(this.props).forEach(key => {
-          if (ValidMapOptions[key]) {
-            options[key] = this.props[key]
-          }
-
-          if (ValidMapEvent[key]) {
-            events.push(key)
-          }
-        })
-
-        const map = new AMap.Map(this.container, {
-          ...options,
-          mapStyle: 'amap://styles/whitesmoke'
-        })
-
-        events.forEach(key => {
-          const evt = AMap.event.addListener(
-            map,
-            mapToMapEvent(key),
-            this.props[key]
-          )
-          this.events.push(evt)
-        })
-
-        this.AMap = AMap
-        this.map = map
-        this.setState({ mount: true })
+    const ready = AMap => {
+      this.AMap = AMap
+      return new Promise((resolve, reject) => {
+        this.load()
+          .then(() => {
+            this.events = bindEvents(AMap, this.map, this.props)
+            this.setState({ mount: true })
+          })
+          .then(resolve)
+          .catch(reject)
       })
-      .catch(err => {
-        throw err
-      })
+    }
+    loadMap(AMAP_KEY, ['AMap.Geocoder']).then(ready).catch(err => {
+      throw err
+    })
   }
   componentWillUnmount() {
-    this.events.forEach(evt => {
-      AMap.event.removeListener(evt)
+    Object.keys(events).forEach(key => {
+      AMap.event.removeListener(events[key])
+      delete events[key]
     })
     this.map.clearMap()
     this.map.clearInfoWindow()
@@ -213,6 +121,30 @@ class Map extends Component {
 Map.childContextTypes = {
   AMap: PropTypes.object,
   map: PropTypes.object
+}
+
+function mapLocationToPosition(center) {
+  return new Promise(function(resolve, reject) {
+    if (!AMap && !AMap.Geocoder) {
+      reject(new Error('Not Found AMap or AMap.Geocoder'))
+    } else if (typeof center === 'string') {
+      const geo = new AMap.Geocoder()
+      geo.getLocation(center, function(status, response) {
+        const { info, geocodes } = response
+        if (status !== 'complete' || info !== 'OK' || geocodes.length === 0) {
+          return resolve(undefined)
+        } else {
+          const [result] = geocodes
+          const { location } = result
+          resolve({
+            position: location
+          })
+        }
+      })
+    } else {
+      resolve(center)
+    }
+  })
 }
 
 export default Map

@@ -11,15 +11,19 @@
 import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import template from 'html-webpack-template'
-import findConfigs from './../find-configs'
-import foldConfigs from './../fold-configs'
-import { dllScriptPath, dllRefPlugin } from './../dll/dll-options'
+import findConfigs from '../find-configs'
+import foldConfigs from '../fold-configs'
+import mapRuntimeConfig from '../map-runtime-config'
+import { dllScriptPath, dllRefPlugin } from '../dll/dll-options'
 import type { WebpackOptions } from './webpack-options'
+import IconHtmlPlugin from '../icon-html-plugin'
 import { NamedModulesPlugin, DefinePlugin, EnvironmentPlugin } from 'webpack'
 
 const distPath: string = path.resolve(__dirname, 'dist')
 const srcPath: string = path.resolve(__dirname, 'src')
 const configPath: string = path.resolve(__dirname, 'config')
+const dataPath: string = path.resolve(__dirname, 'data')
+const publicPath: string = path.resolve(__dirname, 'public')
 const dllPath: string = path.resolve(distPath, 'dll')
 const libPath: string = path.resolve(srcPath, 'lib')
 const libStylePath: string = path.resolve(libPath, 'styles')
@@ -27,6 +31,8 @@ const viewPath: string = path.resolve(srcPath, 'view')
 const componentPath: string = path.resolve(srcPath, 'component')
 const corePath: string = path.resolve(srcPath, 'core')
 const iconPath: string = 'feather/icons'
+const imagePath: string = path.resolve(publicPath, 'images')
+const mapPath: string = path.resolve(dataPath, 'maps')
 
 function webpackOptions(config): WebpackOptions {
   return {
@@ -54,8 +60,20 @@ function webpackOptions(config): WebpackOptions {
           ]
         },
         {
+          test: /map[^.]+\.json$/,
+          use: ['json-loader', './builder/echarts-topojson-loader.js']
+        },
+        {
           test: /icon[^.]+\.svg$/,
           use: ['babel-loader', 'react-svg-loader']
+        },
+        {
+          test: /\.(png|jpg|gif)$/,
+          use: ['url-loader?limit=5000']
+        },
+        {
+          test: /\.(eot|ttf|woff|woff2)$/,
+          use: ['url-loader?limit=0']
         }
       ]
     },
@@ -66,7 +84,10 @@ function webpackOptions(config): WebpackOptions {
         view: viewPath,
         component: componentPath,
         core: corePath,
-        icon: iconPath
+        icon: iconPath,
+        data: dataPath,
+        map: mapPath,
+        image: imagePath
       }
     },
     devServer: {
@@ -90,6 +111,7 @@ function webpackOptions(config): WebpackOptions {
           dllScriptPath('icon')
         ]
       }),
+      //new IconHtmlPlugin(),
 
       // Dll lib link
       dllRefPlugin(distPath, 'vendor'),
@@ -100,7 +122,7 @@ function webpackOptions(config): WebpackOptions {
       new NamedModulesPlugin(),
 
       // Define configs and environment
-      new DefinePlugin(config),
+      new DefinePlugin(mapRuntimeConfig(config)),
       new EnvironmentPlugin(['NODE_ENV'])
     ]
   }
@@ -111,6 +133,6 @@ export default function makeApp() {
     .then(foldConfigs)
     .then(webpackOptions)
     .catch(err => {
-      throw new Error(err)
+      throw err
     })
 }

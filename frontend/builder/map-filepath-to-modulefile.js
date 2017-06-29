@@ -10,6 +10,7 @@
 
 import glob from 'glob'
 import path from 'path'
+import { promisify } from 'util'
 
 export default function mapFilePathToModuleFile(
   prefix: string,
