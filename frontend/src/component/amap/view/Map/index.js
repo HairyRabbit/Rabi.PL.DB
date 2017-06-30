@@ -84,7 +84,10 @@ class Map extends Component {
           .catch(reject)
       })
     }
-    loadMap(AMAP_KEY, ['AMap.Geocoder']).then(ready).catch(err => {
+    if (!process.env.AMAP_KEY) {
+      throw new Error(`Not Found AMAP_KEY defined.`)
+    }
+    loadMap(process.env.AMAP_KEY, ['AMap.Geocoder']).then(ready).catch(err => {
       throw err
     })
   }
