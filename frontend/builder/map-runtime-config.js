@@ -8,41 +8,31 @@
  * Write config to runtime by `DefinePlugin`
  */
 
-import isPlainObject from 'lodash/isPlainObject'
+import get from 'lodash/get'
 
-function mapRuntimeConfig(configs) {
-  let acc = {}
-
-  function makeKey(path, key) {
-    return path === '' ? key.toUpperCase() : [path, key].join('_').toUpperCase()
+function mapRuntimeConfig(configs: Object): Object {
+  function filter(key: string): boolean {
+    return Boolean(configs[key].runtime)
   }
 
-  function recur(path, obj) {
-    const keys = Object.keys(obj)
-    if (keys.indexOf('runtime') !== -1) {
-      keys.forEach(key => {
-        const pathkey = makeKey(path, key)
-        const val = obj[key]
-        if (key !== 'runtime' && !isPlainObject(val)) {
-          acc[pathkey] = JSON.stringify(val)
-        } else {
-          recur(pathkey, val)
-        }
-      })
-    } else {
-      keys.forEach(key => {
-        var pathkey = makeKey(path, key)
-        const val = obj[key]
-        if (isPlainObject(val)) {
-          recur(pathkey, val)
-        }
+  function folder(acc: Object, key: string): Object {
+    const config: Object = configs[key]
+    const runtime: Array<string> = config.runtime
+    if (runtime.length !== 0) {
+      runtime.forEach(path => {
+        const prop: string =
+          'process.env.' +
+          [key, path].join('.').replace(/\./g, '_').toUpperCase()
+        const value: string = JSON.stringify(get(config, path))
+
+        acc[prop] = value
       })
     }
+
+    return acc
   }
 
-  recur('', configs)
-
-  return acc
+  return Object.keys(configs).filter(filter).reduce(folder, {})
 }
 
 export default mapRuntimeConfig

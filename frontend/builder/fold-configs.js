@@ -10,6 +10,7 @@
 
 import fs from 'fs'
 import path from 'path'
+import { promisify } from 'util'
 
 type Name = string
 type Content = string

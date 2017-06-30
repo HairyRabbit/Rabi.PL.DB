@@ -1,0 +1,8 @@
+{
+  "url": "http://webapi.amap.com/maps?v=1.3",
+  "key": "417f3e40ffc0d21033841526e3116387",
+  "runtime": [
+    "url",
+    "key"
+  ]
+}
