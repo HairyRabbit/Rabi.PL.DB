@@ -4,40 +4,32 @@
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import type { MapComponent } from '../../lib/base-interface'
 import loadMap from '../../lib/load-map'
-import mapPositionToLngLat from '../../lib/map-position-to-lnglat'
 import bindEvents from '../../lib/bind-events'
 import style from './style.css'
 
-function normalizeMapEvent(event: MapEvent): string {
-  switch (event) {
-    case 'onDoubleClick':
-      return 'onDblClick'
-    case 'onContextMenu':
-      return 'onRightClick'
-    case 'onDrag':
-      return 'onDragging'
-    default:
-      return event
-  }
+type Prop = {
+  zoom: $PropertyType<AMap$MapOptions, 'zoom'>,
+  center: $PropertyType<AMap$MapOptions, 'center'>
 }
 
-function mapToMapEvent(event: MapEvent): string {
-  return normalizeMapEvent(event).slice(2).toLowerCase()
+type State = {
+  mount: boolean
 }
 
-class Map extends Component {
-  constructor(props: Prop) {
-    super(props)
-    this.state = { mount: false }
-    this.events = []
-    this.AMap = null
-    this.map = null
-  }
+class Map extends Component<void, Prop, State> implements MapComponent {
+  AMap: AMap
+  map: AMap$Map
+  events: { [string]: AMap$EventListener } = []
+  container: HTMLElement
+  state = { mount: false }
+
   checkInfoWindow() {
     // TODO
   }
-  componentWillReceiveProps(nextProps) {
+
+  componentWillReceiveProps(nextProps: Prop): void {
     if (nextProps.zoom !== this.props.zoom) {
       this.map.setZoom(nextProps.zoom)
     }
@@ -55,26 +47,30 @@ class Map extends Component {
     }
   }
 
-  load() {
+  load(): Promise<*> {
+    const { container } = this
     const { center, zoom } = this.props
 
-    return new Promise((resolve, reject) => {
-      mapLocationToPosition(center)
-        .then(location => {
-          this.map = new AMap.Map(this.container, {
-            center: location && location.position,
-            zoom,
-            mapStyle: 'amap://styles/whitesmoke'
+    return new Promise(
+      function(resolve, reject) {
+        mapLocationToPosition(center)
+          .then(location => {
+            this.map = new AMap.Map(container, {
+              center: location && location.position,
+              zoom,
+              mapStyle: 'amap://styles/whitesmoke'
+            })
           })
-        })
-        .then(resolve)
-        .catch(reject)
-    })
+          .then(resolve)
+          .catch(reject)
+      }.bind(this)
+    )
   }
-  componentDidMount() {
-    const ready = AMap => {
+  componentDidMount(): void {
+    function ready(AMap) {
       this.AMap = AMap
-      return new Promise((resolve, reject) => {
+
+      function bindEventPromise(resolve, reject) {
         this.load()
           .then(() => {
             this.events = bindEvents(AMap, this.map, this.props)
@@ -82,14 +78,17 @@ class Map extends Component {
           })
           .then(resolve)
           .catch(reject)
+      }
+
+      return new Promise(bindEventPromise.bind(this))
+    }
+
+    loadMap({ plugins: ['AMap.Geocoder'] })
+      .then(ready.bind(this))
+      .catch(err => {
+        // Error Handle
+        throw err
       })
-    }
-    if (!process.env.AMAP_KEY) {
-      throw new Error(`Not Found AMAP_KEY defined.`)
-    }
-    loadMap(process.env.AMAP_KEY, ['AMap.Geocoder']).then(ready).catch(err => {
-      throw err
-    })
   }
   componentWillUnmount() {
     Object.keys(events).forEach(key => {

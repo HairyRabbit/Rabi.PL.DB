@@ -2,7 +2,7 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-function normalizeEventName(key) {
+function normalizeEventName(key: string): string {
   return key.slice(2).toLowerCase()
 }
 

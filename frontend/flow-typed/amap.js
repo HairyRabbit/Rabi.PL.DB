@@ -462,7 +462,8 @@ declare class AMap$OverView extends AMap$Event {}
 /// AMap
 
 declare type AMap = {
-  event: EventEmitter,
+  event: AMap$EventEmitter,
+  EventListener: AMap$EventListener,
   plugin: Function,
   service: Function,
   Pixel: AMap$Pixel,

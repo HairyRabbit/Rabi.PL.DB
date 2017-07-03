@@ -25,7 +25,7 @@ type Options = {
   plugins?: Array<string>
 }
 
-const defaultOptions = {
+const defaultOptions: Options = {
   plugins: []
 }
 
