@@ -9,16 +9,17 @@
  */
 
 import normalizeEventName from './normalize-event-name'
+import type { EventMap } from './base-interface'
 
-function folder<T, P, O>(
-  AMap: AMap,
+function folder<A, T, P, O>(
+  AMap: A,
   target: T,
   props: P,
   options: O
 ): Function {
-  return function(acc: Object, curr: string): { [string]: AMap$EventListener } {
+  return function(acc: EventMap, curr: string): EventMap {
     const name: string = options[curr] || normalizeEventName(curr)
-    const event: AMap$EventListener = AMap.event.addListener(
+    const event: AMap.EventListener = AMap.event.addListener(
       target,
       name,
       props[curr]
@@ -28,12 +29,12 @@ function folder<T, P, O>(
   }
 }
 
-function bindEvents(
-  AMap: AMap,
-  target: any,
-  props: { [string]: any },
+function bindEvents<T, P>(
+  AMap: typeof AMap,
+  target: T,
+  props: P,
   options?: { [string]: string }
-): { [string]: AMap$EventListener } {
+): EventMap {
   return Object.keys(props)
     .filter(x => /^on/.test(x))
     .reduce(folder(AMap, target, props, options || {}), {})

@@ -6,7 +6,7 @@ import React, { Component, isValidElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import PropTypes from 'prop-types'
 import bindEvents from '../../lib/bind-events'
-import type { MapComponent, LngLat, Pixel } from '../../lib/base-interface'
+import type MapComponent, { EventMap } from '../../lib/base-interface'
 
 type Prop = {
   isCustom: boolean,
@@ -23,8 +23,11 @@ type Prop = {
   onClose: Function
 }
 
-class InfoWindow extends Component implements MapComponent {
+class InfoWindow extends Component<void, Prop, void> implements MapComponent {
+  AMap: typeof AMap
+  map: AMap.Map
   props: Prop
+  events: EventMap = {}
   context: Context
 
   load() {

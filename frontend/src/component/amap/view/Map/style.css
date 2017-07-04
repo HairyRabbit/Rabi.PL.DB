@@ -8,3 +8,8 @@
 :global(.amap-copyright) {
   display: none !important;
 }
+
+.container {
+  width: 40rem;
+  height: 24.7213rem;
+}

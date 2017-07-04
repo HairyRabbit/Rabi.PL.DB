@@ -26,6 +26,8 @@ type Options = {
 }
 
 const defaultOptions: Options = {
+  url: 'http://webapi.amap.com/maps',
+  version: '1.3',
   plugins: []
 }
 
@@ -43,9 +45,9 @@ function jsonp(
 
 function makeRequestUrl(options: Options): Function {
   const url: ?$PropertyType<Options, 'url'> =
-    options.url || process.env.AMAP_URL
+    options.url || process.env.AMAP_URL || defaultOptions.url
   const version: ?$PropertyType<Options, 'version'> =
-    options.version || process.env.AMAP_VERSION
+    options.version || process.env.AMAP_VERSION || defaultOptions.version
   const key: ?$PropertyType<Options, 'key'> =
     options.key || process.env.AMAP_KEY
   const plugins: $PropertyType<Options, 'plugins'> =
@@ -67,7 +69,7 @@ callback=${callback}`
   }
 }
 
-function loadMap(options?: Options): Promise<*> {
+function loadMap(options?: Options): Promise<typeof AMap> {
   const root: Object = getRoot()
 
   if (root.AMap) {
