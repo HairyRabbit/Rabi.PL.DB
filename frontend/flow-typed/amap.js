@@ -7,7 +7,7 @@
 /// Basic
 
 declare class AMap$Pixel {
-  constructor(x: number, y: number): AMap$Pixel,
+  constructor(x: number, y: number): void,
   getX(): number,
   getY(): number,
   equals(point: AMap$Pixel): boolean,
@@ -15,14 +15,14 @@ declare class AMap$Pixel {
 }
 
 declare class AMap$Size {
-  constructor(width: number, height: number): AMap$Size,
+  constructor(width: number, height: number): void,
   getWidth(): number,
   getHeight(): number,
   toString(): string
 }
 
 declare class AMap$LngLat {
-  constructor(lng: number, lat: number): AMap$LngLat,
+  constructor(lng: number, lat: number): void,
   offset(w: number, s: number): AMap$LngLat,
   distance(lnglat: AMap$LngLat | Array<AMap$LngLat>): number,
   getLng(): number,
@@ -32,7 +32,7 @@ declare class AMap$LngLat {
 }
 
 declare class AMap$Bounds {
-  constructor(southWest: AMap$LngLat, northEast: AMap$LngLat): AMap$Bounds,
+  constructor(southWest: AMap$LngLat, northEast: AMap$LngLat): void,
   contains(point: AMap$LngLat): boolean,
   getCenter(): AMap$LngLat,
   getSouthWest(): AMap$LngLat,
@@ -58,41 +58,38 @@ declare class AMap$View2D {
 }
 
 declare type AMap$MapOptions = {
-  view: AMap$View2D,
-  layers: Array<AMap$TileLayer>,
-  zoom: number,
-  center: AMap$LngLat,
-  labelzIndex: number,
-  zooms: Array<$PropertyType<AMap$MapOptions, 'zoom'>>,
-  lang: Lang,
-  cursor: string,
-  crs: CRS,
-  animateEnable: boolean,
-  isHotspot: boolean,
-  defaultLayer: AMap$TileLayer,
-  rotateEnable: boolean,
-  resizeEnable: boolean,
-  showIndoorMap: boolean,
+  view?: AMap$View2D,
+  layers?: Array<AMap$TileLayer>,
+  zoom?: number,
+  center?: AMap$LngLat,
+  labelzIndex?: number,
+  zooms?: Array<$PropertyType<AMap$MapOptions, 'zoom'>>,
+  lang?: Lang,
+  cursor?: string,
+  crs?: CRS,
+  animateEnable?: boolean,
+  isHotspot?: boolean,
+  defaultLayer?: AMap$TileLayer,
+  rotateEnable?: boolean,
+  resizeEnable?: boolean,
+  showIndoorMap?: boolean,
   // TODO IndoorMap
-  indoorMap: any,
-  expandZoomRange: boolean,
-  dragEnable: boolean,
-  zoomEnable: boolean,
-  doubleClickZoom: boolean,
-  keyboardEnable: boolean,
-  jogEnable: boolean,
-  scrollWheel: boolean,
-  touchZoom: boolean,
-  mapStyle: string,
-  features: Array<Feature>,
-  showBuildingBlock: boolean
+  indoorMap?: any,
+  expandZoomRange?: boolean,
+  dragEnable?: boolean,
+  zoomEnable?: boolean,
+  doubleClickZoom?: boolean,
+  keyboardEnable?: boolean,
+  jogEnable?: boolean,
+  scrollWheel?: boolean,
+  touchZoom?: boolean,
+  mapStyle?: string,
+  features?: Array<Feature>,
+  showBuildingBlock?: boolean
 }
 
 declare class AMap$Map extends AMap$Event {
-  constructor(
-    container: string | HTMLDivElement,
-    opts: AMap$MapOptions
-  ): AMap$Map,
+  constructor(container: string | HTMLElement, opts?: AMap$MapOptions): void,
   poiOnAMAP(obj: Object): void,
   detailOnAMAP(obj: Object): void,
   getZoom(): $PropertyType<AMap$MapOptions, 'zoom'>,
@@ -461,7 +458,7 @@ declare class AMap$OverView extends AMap$Event {}
 
 /// AMap
 
-declare type AMap = {
+declare var AMap: {
   event: AMap$EventEmitter,
   EventListener: AMap$EventListener,
   plugin: Function,
@@ -470,7 +467,7 @@ declare type AMap = {
   Size: AMap$Size,
   LngLat: AMap$LngLat,
   Bounds: AMap$Bounds,
-  Map: AMap$Map,
+  Map: typeof AMap$Map,
   TileLayer: AMap$TileLayer,
   CustomLayer: AMap$CustomLayer,
   Marker: AMap$Marker,
