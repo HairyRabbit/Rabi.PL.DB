@@ -6,43 +6,19 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import type {
   MapComponent,
-  LngLat,
-  Pixel,
-  Bounds,
-  MapsEvent
+  MapComponentContext,
+  EventMap
 } from '../../lib/base-interface'
 
-type Prop = {
-  position: LngLat,
-  offset: Pixel,
-  icon: string | Icon,
-  content: string | Object,
-  topWhenClick: boolean,
-  bubble: boolean,
-  draggable: boolean,
-  raiseOnDrag: boolean,
-  cursor: string,
-  visible: boolean,
-  zIndex: number,
-  angle: number,
-  autoRotation: boolean,
-  animation:
-    | 'AMAP_ANIMATION_NONE'
-    | 'AMAP_ANIMATION_DROP'
-    | 'AMAP_ANIMATION_BOUNCE',
-  shadow: Icon,
-  title: string,
-  clickable: boolean,
-  extData: any,
-  label: {
-    content: string,
-    offset: Pixel
-  }
-}
+type Prop = {}
 
 class Marker extends Component implements MapComponent {
+  AMap: typeof AMap
+  map: AMap.Map
   props: Prop
-  context: Context
+  events: EventMap = {}
+  context: MapComponentContext
+  marker: AMap.Marker
 
   load() {
     const { position } = this.props
@@ -58,6 +34,7 @@ class Marker extends Component implements MapComponent {
     this.load()
     map.add(this.marker)
   }
+
   componentWillUnmount() {
     const { map } = this.context
     map.remove(this.marker)

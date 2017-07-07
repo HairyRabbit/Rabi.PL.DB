@@ -17,5 +17,3 @@ export interface MapComponent {
   events: EventMap,
   load(): void | Promise<*>
 }
-
-export default MapComponent

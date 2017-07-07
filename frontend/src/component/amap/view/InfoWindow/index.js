@@ -6,58 +6,80 @@ import React, { Component, isValidElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import PropTypes from 'prop-types'
 import bindEvents from '../../lib/bind-events'
-import type MapComponent, { EventMap } from '../../lib/base-interface'
+import mapLocationToPosition from '../../lib/map-location-to-position'
+import type {
+  MapComponent,
+  MapComponentContext,
+  EventMap
+} from '../../lib/base-interface'
+
+type InfoWindowEvents = {
+  onChange?: Function,
+  onOpen?: Function,
+  onClose?: Function
+}
 
 type Prop = {
-  isCustom: boolean,
-  autoMove: boolean,
-  closeWhenClickMap: boolean,
-  shadow: boolean,
-  disabled: boolean,
-  children: React.Element<*>,
-  //size: Size,
-  //offset: Pixel,
-  position: LngLat,
-  onChange: Function,
-  onOpen: Function,
-  onClose: Function
-}
+  disabled?: boolean,
+  children?: React.Element<*> | string
+} & typeof AMap.InfoWindowOptions &
+  InfoWindowEvents
 
 class InfoWindow extends Component<void, Prop, void> implements MapComponent {
   AMap: typeof AMap
   map: AMap.Map
   props: Prop
   events: EventMap = {}
-  context: Context
+  context: MapComponentContext
+  infowindow: AMap.InfoWindow
 
-  load() {
+  load(): Promise<void> {
     const { AMap, map } = this.context
-    const {
-      isCustom,
-      autoMove,
-      closeWhenClickMap,
-      position,
-      children
-    } = this.props
-    this.infowindow = new AMap.InfoWindow({
-      isCustom,
-      autoMove,
-      position,
-      closeWhenClickMap,
-      content: setContent(children)
-    })
-  }
 
-  componentWillReceiveProps(nextProps) {
-    const { map } = this.context
-    const { infowindow } = this
-
-    if (nextProps.position !== this.props.position) {
-      infowindow.setPosition(nextProps.position)
+    function setInfoWindow(
+      location: ?([number, number] | { position: AMap.LngLat })
+    ) {
+      const loc = !location || Array.isArray(location)
+        ? location
+        : location.position
+      this.infowindow = new AMap.InfoWindow({
+        ...this.props,
+        position: loc,
+        content: stringifyContent(this.props.children)
+      })
     }
 
-    // TODO always set children
-    nextProps.children && infowindow.setContent(setContent(nextProps.children))
+    return mapLocationToPosition(AMap, this.props.position).then(
+      setInfoWindow.bind(this)
+    )
+  }
+
+  componentWillReceiveProps(nextProps: Prop): void {
+    const { map } = this.context
+
+    if (nextProps.position && nextProps.position !== this.props.position) {
+      if (typeof nextProps.position !== 'string') {
+        this.map.setCenter(nextProps.position)
+      } else {
+        mapLocationToPosition(
+          this.AMap,
+          nextProps.position
+        ).then((location: ?LocationCenter) => {
+          if (location) {
+            const loc = Array.isArray(location) ? location : location.position
+            this.infowindow.setPosition(loc)
+          }
+        })
+      }
+    }
+
+    if (nextProps.children) {
+      // TODO store or cache content
+      const ctx: ?string = stringifyContent(nextProps.children)
+      if (ctx && ctx === stringifyContent(this.props.children)) {
+        this.infowindow.setContent(ctx)
+      }
+    }
   }
 
   shouldComponentUpdate() {
@@ -68,13 +90,16 @@ class InfoWindow extends Component<void, Prop, void> implements MapComponent {
     const { AMap, map } = this.context
     const { disabled, position } = this.props
 
-    this.load()
-    if (disabled) {
-      this.infowindow.close()
-    } else {
-      this.infowindow.open(map)
+    function ready() {
+      if (disabled) {
+        this.infowindow.close()
+      } else {
+        this.infowindow.open(map)
+      }
+      this.events = bindEvents(AMap, this.infowindow, this.props)
     }
-    this.events = bindEvents(AMap, this.infowindow, this.props)
+
+    this.load().then(ready.bind(this))
   }
   componentWillUnmount() {
     const { map } = this.context
@@ -97,11 +122,24 @@ InfoWindow.contextTypes = {
   map: PropTypes.object
 }
 
-function setContent(content: any): ?string {
-  return (
-    content &&
-    (isValidElement(content) ? renderToStaticMarkup(content) : String(content))
-  )
+function stringifyContent(content: $PropertyType<Prop, 'children'>): ?string {
+  const ctx: $PropertyType<Prop, 'children'> = content
+
+  if (process.env.NODE_ENV === 'development') {
+    !ctx &&
+      console.warn(`<InfoWindow /> \
+Component wan't contents, but got null. Set default content to 'undefined'.`)
+  }
+
+  if (!ctx) {
+    return undefined
+  }
+
+  if (typeof ctx === 'string' || !isValidElement(ctx)) {
+    return String(ctx)
+  }
+
+  return renderToStaticMarkup(ctx)
 }
 
 export default InfoWindow

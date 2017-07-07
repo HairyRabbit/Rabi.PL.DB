@@ -42,15 +42,19 @@ declare class AMap$Bounds {
 
 /// Map
 
-declare type CRS = 'EPSG3857' | 'EPSG3395' | 'EPSG4326'
-declare type Feature = 'bg' | 'point' | 'road' | 'building'
-declare type Lang = 'zh_cn' | 'en' | 'zh_en'
+declare type AMap$CRS = 'EPSG3857' | 'EPSG3395' | 'EPSG4326'
+declare type AMap$Feature = 'bg' | 'point' | 'road' | 'building'
+declare type AMap$Lang = 'zh_cn' | 'en' | 'zh_en'
+declare type AMap$Animation =
+  | 'AMAP_ANIMATION_NONE'
+  | 'AMAP_ANIMATION_DROP'
+  | 'AMAP_ANIMATION_BOUNCE'
 
 declare type AMap$View2DOptions = {
   center: AMap$LngLat,
   rotation: number,
   zoom: number,
-  crs: CRS
+  crs: AMap$CRS
 }
 
 declare class AMap$View2D {
@@ -61,12 +65,12 @@ declare type AMap$MapOptions = {
   view?: AMap$View2D,
   layers?: Array<AMap$TileLayer>,
   zoom?: number,
-  center?: AMap$LngLat,
+  center?: ?(AMap$LngLat | [number, number]),
   labelzIndex?: number,
   zooms?: Array<$PropertyType<AMap$MapOptions, 'zoom'>>,
-  lang?: Lang,
+  lang?: AMap$Lang,
   cursor?: string,
-  crs?: CRS,
+  crs?: AMap$CRS,
   animateEnable?: boolean,
   isHotspot?: boolean,
   defaultLayer?: AMap$TileLayer,
@@ -84,7 +88,7 @@ declare type AMap$MapOptions = {
   scrollWheel?: boolean,
   touchZoom?: boolean,
   mapStyle?: string,
-  features?: Array<Feature>,
+  features?: Array<AMap$Feature>,
   showBuildingBlock?: boolean
 }
 
@@ -171,7 +175,7 @@ declare class AMap$EventListener {
   target: Object
 }
 
-declare class AMap$EventEmitter {
+declare var AMap$EventEmitter: {
   addDomListener(
     instance: any,
     name: string,
@@ -249,32 +253,29 @@ declare class AMap$Heatmap extends AMap$Event {}
 /// Overlayer
 
 declare type AMap$MarkerOptions = {
-  map: AMap$Map,
-  position: AMap$LngLat,
-  offset: AMap$Pixel,
-  icon: string | AMap$Icon,
-  content: string | HTMLElement,
-  topWhenClick: boolean,
-  bubble: boolean,
-  draggable: boolean,
-  raiseOnDrag: boolean,
-  cursor: string,
-  visible: boolean,
-  zIndex: number,
-  angle: number,
-  autoRotation: boolean,
-  animation:
-    | 'AMAP_ANIMATION_NONE'
-    | 'AMAP_ANIMATION_DROP'
-    | 'AMAP_ANIMATION_BOUNCE',
-  shadow: AMap$Icon,
-  title: string,
-  clickable: string,
-  shape: AMap$MarkerShape,
-  extData: any,
-  label: {
-    content: $PropertyType<AMap$MarkerOptions, 'content'>,
-    offset: $PropertyType<AMap$MarkerOptions, 'offset'>
+  map?: AMap$Map,
+  position?: AMap$LngLat,
+  offset?: AMap$Pixel,
+  icon?: string | AMap$Icon,
+  content?: string | HTMLElement,
+  topWhenClick?: boolean,
+  bubble?: boolean,
+  draggable?: boolean,
+  raiseOnDrag?: boolean,
+  cursor?: string,
+  visible?: boolean,
+  zIndex?: number,
+  angle?: number,
+  autoRotation?: boolean,
+  animation?: AMap$Animation,
+  shadow?: AMap$Icon,
+  title?: string,
+  clickable?: string,
+  shape?: AMap$MarkerShape,
+  extData?: any,
+  label?: {
+    content?: $PropertyType<AMap$MarkerOptions, 'content'>,
+    offset?: $PropertyType<AMap$MarkerOptions, 'offset'>
   }
 }
 
@@ -361,19 +362,19 @@ declare class AMap$ContextMenu extends AMap$Event {}
 /// Window
 
 declare type AMap$InfoWindowOptions = {
-  isCustom: boolean,
-  autoMove: boolean,
-  closeWhenClickMap: boolean,
-  content: string | HTMLElement,
-  size: AMap$Size,
-  offset: AMap$Pixel,
-  position: AMap$LngLat,
-  showShadow: boolean
+  isCustom?: boolean,
+  autoMove?: boolean,
+  closeWhenClickMap?: boolean,
+  content?: ?(string | HTMLElement),
+  size?: AMap$Size,
+  offset?: AMap$Pixel,
+  position?: ?(AMap$LngLat | [number, number]),
+  showShadow?: boolean
 }
 
 declare class AMap$InfoWindow extends AMap$Event {
-  constructor(opt: AMap$InfoWindowOptions): AMap$InfoWindow,
-  open(map: AMap$Map, pos: AMap$LngLat): void,
+  constructor(opt: AMap$InfoWindowOptions): void,
+  open(map: AMap$Map, pos?: AMap$LngLat): void,
   close(): void,
   getIsOpen(): boolean,
   setContent(content: $PropertyType<AMap$InfoWindowOptions, 'content'>): void,
@@ -392,21 +393,39 @@ declare class AMap$ContextMenu extends AMap$Event {}
 /// Geo
 
 declare type AMap$GeocoderOptions = {
-  city: string,
-  radius: number,
-  batch: boolean,
-  extensions: string
+  city?: string,
+  radius?: number,
+  batch?: boolean,
+  extensions?: string
 }
 
 declare class AMap$Geocoder extends AMap$Event {
-  constructor(opts: AMap$GeocoderOptions): AMap$Geocoder,
-  // TODO callback
-  getLocation(address: string, callback: Function): void,
+  constructor(opts?: AMap$GeocoderOptions): void,
+  getLocation(
+    address: string,
+    callback: (status: string, result: AMap$GeocodeResult) => void
+  ): void,
   setCity(city: $PropertyType<AMap$GeocoderOptions, 'city'>): void,
+  // TODO callback
   getAddress(
     location: AMap$LngLat | Array<AMap$LngLat>,
     callback: Function
   ): void
+}
+
+declare class AMap$GeocodeResult {
+  info: string,
+  geocodes: Array<AMap$Geocode>,
+  resultNum: number
+}
+
+declare class AMap$Geocode {
+  // TODO
+  addressComponent: any,
+  formattedAddress: string,
+  location: AMap$LngLat,
+  adcode: string,
+  level: string
 }
 
 declare class AMap$convertFrom extends AMap$Event {}
@@ -459,20 +478,24 @@ declare class AMap$OverView extends AMap$Event {}
 /// AMap
 
 declare var AMap: {
-  event: AMap$EventEmitter,
-  EventListener: AMap$EventListener,
+  event: typeof AMap$EventEmitter,
+  EventListener: typeof AMap$EventListener,
   plugin: Function,
   service: Function,
-  Pixel: AMap$Pixel,
-  Size: AMap$Size,
-  LngLat: AMap$LngLat,
-  Bounds: AMap$Bounds,
+  Pixel: typeof AMap$Pixel,
+  Size: typeof AMap$Size,
+  LngLat: typeof AMap$LngLat,
+  Bounds: typeof AMap$Bounds,
   Map: typeof AMap$Map,
-  TileLayer: AMap$TileLayer,
-  CustomLayer: AMap$CustomLayer,
-  Marker: AMap$Marker,
-  InfoWindow: AMap$InfoWindow,
-  Geocoder: AMap$Geocoder,
-  ToolBar: AMap$ToolBar,
-  Scale: AMap$Scale
+  MapOptions: AMap$MapOptions,
+  TileLayer: typeof AMap$TileLayer,
+  CustomLayer: typeof AMap$CustomLayer,
+  Marker: typeof AMap$Marker,
+  InfoWindow: typeof AMap$InfoWindow,
+  InfoWindowOptions: AMap$InfoWindowOptions,
+  Geocoder: typeof AMap$Geocoder,
+  GeocodeResult: typeof AMap$GeocodeResult,
+  Geocode: typeof AMap$Geocode,
+  ToolBar: typeof AMap$ToolBar,
+  Scale: typeof AMap$Scale
 }

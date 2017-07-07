@@ -5,9 +5,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import loadMap from '../../lib/load-map'
-import loadPlugins from '../../lib/load-plugins'
 import bindEvents from '../../lib/bind-events'
-import type MapComponent, {
+import mapLocationToPosition from '../../lib/map-location-to-position'
+import type {
+  MapComponent,
   EventMap,
   MapComponentContext
 } from '../../lib/base-interface'
@@ -49,18 +50,14 @@ type Prop = {
   width: number,
   key?: string,
   plugins?: Array<string>
-} & AMap.MapOptions &
+} & typeof AMap.MapOptions &
   MapEvent
 
 type State = {
   mount: boolean
 }
 
-type LocationResult = {
-  position: AMap.LngLat
-}
-
-type LocationCenter = [number, number] | LocationResult
+type LocationCenter = [number, number] | { position: AMap.LngLat }
 
 class Map extends Component<void, Prop, State> implements MapComponent {
   // Interface
@@ -85,7 +82,7 @@ class Map extends Component<void, Prop, State> implements MapComponent {
       this.map.setZoom(nextProps.zoom)
     }
 
-    if (nextProps.center !== this.props.center) {
+    if (nextProps.center && nextProps.center !== this.props.center) {
       if (typeof nextProps.center !== 'string') {
         this.map.setCenter(nextProps.center)
       } else {
@@ -192,52 +189,6 @@ class Map extends Component<void, Prop, State> implements MapComponent {
 Map.childContextTypes = {
   AMap: PropTypes.object,
   map: PropTypes.object
-}
-
-function mapLocationToPosition(
-  AMap: typeof AMap,
-  center: ?([number, number] | string | AMap.LngLat)
-): Promise<?LocationCenter> {
-  return new Promise(function(resolve: Function, reject: Function): void {
-    if (!AMap && !AMap.Geocoder) {
-      throw new Error('Not Found AMap or AMap.Geocoder')
-    }
-
-    if (typeof center === 'string') {
-      const cen: string = center
-
-      loadPlugins(AMap, 'Geocoder')
-        .then(function(): void {
-          const geo: AMap.Geocoder = new AMap.Geocoder()
-
-          geo.getLocation(cen, function(
-            status: string,
-            response: AMap.GeocodeResult
-          ): void {
-            const {
-              info,
-              geocodes
-            }: { info: string, geocodes: Array<AMap.Geocode> } = response
-
-            if (
-              status !== 'complete' ||
-              info !== 'OK' ||
-              geocodes.length === 0
-            ) {
-              resolve(undefined)
-            } else {
-              const location: AMap.LngLat = geocodes[0].location
-              resolve({
-                position: location
-              })
-            }
-          })
-        })
-        .catch(reject)
-    } else {
-      resolve(center)
-    }
-  })
 }
 
 export default Map
