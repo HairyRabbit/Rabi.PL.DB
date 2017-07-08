@@ -131,11 +131,8 @@ interface Icons {
 
 class IconPlugin implements Icons {
   outputFileName: string
-
   icons: $PropertyType<Icons, 'icons'>
-
   startPoint: number = 0xe000
-
   stream: fs.WriteStream
 
   iconBuffers: {

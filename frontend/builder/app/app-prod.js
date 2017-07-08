@@ -113,12 +113,12 @@ function webpackOptions(config: Object): WebpackOptions {
       new ChunkManifestPlugin({
         filename: 'chunk-manifest.json',
         manifestVariable: 'webpackManifest'
-      }),
-
-      new IconPlugin({
-        outputPath: 'fonts',
-        outputName: 'iconfont'
       })
+
+      // new IconPlugin({
+      //   outputPath: 'fonts',
+      //   outputName: 'iconfont'
+      // })
     ]
   }
 }

@@ -1,0 +1,8 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+.list-reset {
+  list-style-type: none;
+  margin:  0;
+  padding: 0;
+}

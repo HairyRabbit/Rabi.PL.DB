@@ -1,0 +1,27 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+/**
+ * container.css
+ *
+ * 1. Reset global warpper container, set height to 100%.
+ * 2. Set app container.
+ */
+
+
+html, body {
+  height: 100%;
+}
+
+
+body {
+  margin: 0;
+}
+
+
+#app {
+  display: block;
+  height: 100%;
+  
+  position: relative;
+}

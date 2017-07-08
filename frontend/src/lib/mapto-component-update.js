@@ -2,9 +2,7 @@
 // -*- coding: utf-8 -*-
 // @flow
 
-function decodeActionType(props: string): string {
-  return props.split('/')
-}
+import { decode } from './convert-action-type'
 
 export default function updateComponentModel<Model, Action, Component>(
   model: Model,
@@ -12,16 +10,17 @@ export default function updateComponentModel<Model, Action, Component>(
   namespace: string
 ): Function {
   return function(component: Component): Model {
-    const [_, flag] = decodeActionType(action.type)
-    const compnentModel: string = model[flag]
+    const [_, componentName] = decode(action.type)
+    const compnentModel: string = model[componentName]
     const componentAction: Action = {
       type: action._type,
       payload: action.payload
     }
     const mappedModel: Model = component.update(compnentModel, componentAction)
+
     return {
       ...model,
-      [flag]: mappedModel
+      [componentName]: mappedModel
     }
   }
 }

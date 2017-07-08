@@ -1,0 +1,16 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+/**
+ * navigation.css
+ *
+ * Reset list margin and padding, remove list style type.
+ */
+
+
+nav > ul {
+  margin:  0;
+  padding: 0;
+
+  list-style-type: none;
+}

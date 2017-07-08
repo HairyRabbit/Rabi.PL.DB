@@ -5,7 +5,9 @@
 /**
  * map-runtime-config
  *
- * Write config to runtime by `DefinePlugin`
+ * Write config to runtime by `DefinePlugin`.
+ *
+ * TODO webapck need recomplile when config file was changed.
  */
 
 import get from 'lodash/get'

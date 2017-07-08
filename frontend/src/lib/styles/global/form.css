@@ -1,0 +1,37 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+/**
+ * form.css
+ *
+ * Reset form elements.
+ */
+
+
+input {
+  width: 100%;
+  padding: 0;
+  border:  0;
+  outline: 0;
+
+  font-family: inherit;
+  font-size:   inherit;
+  line-height: inherit;
+
+  color: inherit;
+  background: none;
+}
+
+
+::-webkit-input-placeholder,
+::input-placeholder {
+  line-height: inherit;
+  
+  color: inherit;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  box-shadow: 0 0 0 2rem white inset !important;
+}

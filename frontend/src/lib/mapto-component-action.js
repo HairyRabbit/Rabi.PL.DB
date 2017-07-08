@@ -6,7 +6,35 @@
  * mapto-component-action
  *
  * Change the component action type.
+ *
+ * 1. Package component level action object to page level.
+ *
+ * Example:
+ *
+ * ```js
+ * {
+ *   type: ActionType,
+ *   payload: ActionPayload,
+ * }
+ *
+ * // package to ...
+ *
+ * {
+ *   type: CombinedActionType,
+ *   _type: ActionType,
+ *   payload: ActionPayload
+ * }
+ * ```
+ *
+ * 2. Pass `dispatch` to the async action thunk.
+ *
+ * Work with component async action.
+ *
+ * TODO use redux middleware replace this.
  */
+
+import { encode } from './convert-action-type'
+import type { Dispatch, ThunkAction } from './thunk-type'
 
 type CombinedAction<A> = {
   type: string,
@@ -22,7 +50,7 @@ type CombinedActions<A> = {
   [string]: CombinedAction<A>
 }
 
-function warppedDispatch<A>(dispatch: Dispatch, type: string): Function {
+function warppedDispatch<A>(dispatch: Dispatch<A>, type: string): Function {
   return function(action: A): void {
     dispatch(combineAction(action, type))
   }
@@ -36,22 +64,14 @@ function combineAction<A>(action: A, type: string): CombinedAction<A> {
   }
 }
 
-function encodeActionType(
-  namespace: string,
-  flag: string,
-  type: string
-): string {
-  return [namespace, flag, type].join('/')
-}
-
 function constAction<A>(
   actions: Actions<A>,
   type: string,
   flag: string,
   namespace: string
 ): Function {
-  return function(): CombinedAction<A> | Function {
-    const changedType: string = encodeActionType(namespace, flag, type)
+  return function(): CombinedAction<A> | ThunkAction<A> {
+    const changedType: string = encode(namespace, flag, type)
     const actionCall: Object = actions[type].apply(null, arguments)
 
     if (typeof actionCall !== 'function') {
@@ -69,7 +89,7 @@ function foldAction<A>(
   namespace: string
 ): Function {
   return function(acc: Actions, curr: string): CombinedActions<A> {
-    acc[encodeActionType(namespace, flag, curr)] = constAction(
+    acc[encode(namespace, flag, curr)] = constAction(
       actions,
       curr,
       flag,

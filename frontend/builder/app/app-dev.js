@@ -11,6 +11,7 @@
 import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import template from 'html-webpack-template'
+import bodyParser from 'body-parser'
 import findConfigs from '../find-configs'
 import foldConfigs from '../fold-configs'
 import mapRuntimeConfig from '../map-runtime-config'
@@ -95,7 +96,20 @@ function webpackOptions(config): WebpackOptions {
       port: config.server.port,
       contentBase: distPath,
       publicPath: '/',
-      hot: true
+      hot: true,
+      proxy: {
+        '/live/comment': {
+          bypass: function(req, res) {
+            console.log(req.body)
+            res.sendStatus(200)
+            return false
+          }
+        }
+      },
+      setup(app) {
+        app.use(bodyParser.urlencoded({ extended: false }))
+        app.use(bodyParser.json())
+      }
     },
     plugins: [
       // Generate html page.

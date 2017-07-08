@@ -10,25 +10,17 @@
 
 import fs from 'fs'
 import path from 'path'
-import { promisify } from 'util'
-
-type Name = string
-type Content = string
-type ConfigTuple = [Name, Content]
-
-function readFile(path) {
-  const readFilePromise = promisify(fs.readFile)
-  return readFilePromise(path, 'utf8')
-}
 
 export default function foldConfigs(configs: Array<string>): Object {
-  function mapper(config: string): ConfigTuple {
+  function mapper(config: string): [string, string] {
     const basename: string = path.basename(config, '.json')
-    const content: string = fs.readFileSync(`./config/${basename}.json`)
+    const content: string = fs
+      .readFileSync(`./config/${basename}.json`)
+      .toString()
     return [basename, JSON.parse(content)]
   }
 
-  function folder(acc: Object, curr: ConfigTuple): Object {
+  function folder(acc: Object, curr: [string, string]): Object {
     acc[curr[0]] = curr[1]
     return acc
   }

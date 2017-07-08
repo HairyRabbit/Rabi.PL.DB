@@ -1,0 +1,12 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+/**
+ * flex-center
+ */
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items:     center;
+}
