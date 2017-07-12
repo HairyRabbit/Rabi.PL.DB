@@ -72,7 +72,7 @@ export default function dllOptions(
  * @sig string -> string
  */
 export function dllScriptPath(name: string): string {
-  return `dll/${name}.js`
+  return `/dll/${name}.js`
 }
 
 /**

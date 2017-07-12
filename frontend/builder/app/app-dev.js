@@ -10,8 +10,10 @@
 
 import path from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import LodashModuleReplacementPlugin from 'lodash-webpack-plugin'
 import template from 'html-webpack-template'
 import bodyParser from 'body-parser'
+import fetch from 'node-fetch'
 import findConfigs from '../find-configs'
 import foldConfigs from '../fold-configs'
 import mapRuntimeConfig from '../map-runtime-config'
@@ -31,7 +33,7 @@ const libStylePath: string = path.resolve(libPath, 'styles')
 const viewPath: string = path.resolve(srcPath, 'view')
 const componentPath: string = path.resolve(srcPath, 'component')
 const corePath: string = path.resolve(srcPath, 'core')
-const iconPath: string = 'feather/icons'
+const iconPath: string = 'feather-icons/dist/icons'
 const imagePath: string = path.resolve(publicPath, 'images')
 const mapPath: string = path.resolve(dataPath, 'maps')
 
@@ -43,7 +45,7 @@ function webpackOptions(config): WebpackOptions {
     output: {
       path: distPath,
       filename: '[name].js',
-      chunkFilename: '[id].[name].js',
+      chunkFilename: '[name].js',
       publicPath: '/'
     },
     module: {
@@ -96,19 +98,32 @@ function webpackOptions(config): WebpackOptions {
       port: config.server.port,
       contentBase: distPath,
       publicPath: '/',
+      historyApiFallback: true,
       hot: true,
-      proxy: {
-        '/live/comment': {
-          bypass: function(req, res) {
-            console.log(req.body)
-            res.sendStatus(200)
-            return false
-          }
-        }
-      },
+      proxy: {},
       setup(app) {
         app.use(bodyParser.urlencoded({ extended: false }))
         app.use(bodyParser.json())
+        app.get('/auth', function(req, res) {
+          const client_id = '4bf01785b2c303631188'
+          const client_secret = '0efcdca4b64f28a1887cca874b71dff630f7eb57'
+          const options = {
+            method: 'POST'
+          }
+          fetch(
+            `\
+https://github.com/login/oauth/access_token?\
+client_id=${client_id}&\
+client_secret=${client_secret}&\
+code=${req.query.code}&\
+format=json`,
+            options
+          )
+            .then(response => response.json())
+            .then(response => {
+              res.json(response)
+            })
+        })
       }
     },
     plugins: [
@@ -122,7 +137,8 @@ function webpackOptions(config): WebpackOptions {
         scripts: [
           dllScriptPath('vendor'),
           dllScriptPath('hmr'),
-          dllScriptPath('icon')
+          dllScriptPath('icon'),
+          'https://unpkg.com/github-api/dist/GitHub.bundle.min.js'
         ]
       }),
       //new IconHtmlPlugin(),
@@ -137,7 +153,9 @@ function webpackOptions(config): WebpackOptions {
 
       // Define configs and environment
       new DefinePlugin(mapRuntimeConfig(config)),
-      new EnvironmentPlugin(['NODE_ENV'])
+      new EnvironmentPlugin(['NODE_ENV']),
+
+      new LodashModuleReplacementPlugin()
     ]
   }
 }

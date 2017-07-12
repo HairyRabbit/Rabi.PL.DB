@@ -10,7 +10,7 @@
  * TODO webapck need recomplile when config file was changed.
  */
 
-import get from 'lodash/get'
+import { get } from 'lodash'
 
 function mapRuntimeConfig(configs: Object): Object {
   function filter(key: string): boolean {

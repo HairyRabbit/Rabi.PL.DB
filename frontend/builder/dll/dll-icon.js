@@ -14,6 +14,6 @@ import type { DllOptions } from './dll-options'
 
 export default function makeIconDll(distPath: string): DllOptions {
   return dllOptions(distPath, {
-    icon: mapToFilename('feather/icons', '**/*.svg')
+    icon: mapToFilename('feather-icons/dist/icons', '**/*.svg')
   })
 }
