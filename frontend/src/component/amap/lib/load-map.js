@@ -14,7 +14,7 @@
  * @env {string} AMAP_VERSION
  */
 
-import invariant from 'invariant'
+import { defaults } from 'lodash'
 import getRoot from 'lib/get-root'
 import registerJsonp from 'lib/register-global-jsonp'
 
@@ -26,9 +26,16 @@ type Options = {
 }
 
 const defaultOptions: Options = {
+  key: '',
   url: 'http://webapi.amap.com/maps',
   version: '1.3',
   plugins: []
+}
+
+const envOptions = {
+  key: process.env.AMAP_KEY,
+  url: process.env.AMAP_URL,
+  version: process.env.AMAP_VERSION
 }
 
 function jsonp(
@@ -44,28 +51,32 @@ function jsonp(
 }
 
 function makeRequestUrl(options: Options): Function {
-  const url: ?$PropertyType<Options, 'url'> =
-    options.url || process.env.AMAP_URL || defaultOptions.url
-  const version: ?$PropertyType<Options, 'version'> =
-    options.version || process.env.AMAP_VERSION || defaultOptions.version
-  const key: ?$PropertyType<Options, 'key'> =
-    options.key || process.env.AMAP_KEY
-  const plugins: $PropertyType<Options, 'plugins'> =
-    options.plugins || defaultOptions.plugins
+  const opts: Options = defaults({}, options, envOptions, defaultOptions)
+  const { url, version, key, plugins } = opts
+
   const error_message: string = 'Must provide AMap JSSDK %s'
 
-  invariant(url, error_message, 'url')
-  invariant(version, error_message, 'version')
-  invariant(key, error_message, 'key')
+  if (!url || !version) {
+    throw new Error(`Must provide AMap load url and version`)
+  }
+
+  // invariant(url, error_message, 'url')
+  // invariant(version, error_message, 'version')
+  //invariant(key, error_message, 'key')
 
   return function(callback: string): string {
-    // TODO ${key ? `key=${key}&` : ''}\
-    return `\
+    const href = `\
 ${url}?\
 v=${version}&\
-key=${key}&\
+${key ? `key=${key}&` : ''}\
 ${plugins && plugins.length !== 0 ? `plugin=${plugins.join(',')}&` : ''}\
 callback=${callback}`
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[AMap] Load AMap scripts ${href}`)
+    }
+
+    return href
   }
 }
 

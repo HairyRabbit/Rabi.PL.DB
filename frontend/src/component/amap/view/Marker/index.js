@@ -39,6 +39,7 @@ class Marker extends Component implements MapComponent {
     const { map } = this.context
     map.remove(this.marker)
   }
+
   render() {
     return null
   }

@@ -18,8 +18,8 @@ function mapLocationToPosition(
   center: ?([number, number] | string | AMap.LngLat)
 ): Promise<?([number, number] | { position: AMap.LngLat })> {
   return new Promise(function(resolve: Function, reject: Function): void {
-    if (!AMap && !AMap.Geocoder) {
-      throw new Error('Not Found AMap or AMap.Geocoder')
+    if (!AMap) {
+      throw new Error('[AMap] Not Found AMap')
     }
 
     if (typeof center === 'string') {

@@ -9,13 +9,15 @@
  */
 
 import normalizeEventName from './normalize-event-name'
-import type { EventMap } from './base-interface'
+import type { EventMap, EventAliasOptions } from './base-interface'
 
-function folder<A, T, P, O>(
-  AMap: A,
-  target: T,
-  props: P,
-  options: O
+type EventTarget = AMap.Map | AMap.Marker | AMap.InfoWindow
+
+function folder(
+  AMap: typeof AMap,
+  target: EventTarget,
+  props: *,
+  options: EventAliasOptions
 ): Function {
   return function(acc: EventMap, curr: string): EventMap {
     const name: string = options[curr] || normalizeEventName(curr)
@@ -29,15 +31,26 @@ function folder<A, T, P, O>(
   }
 }
 
-function bindEvents<T, P>(
+function bindEvents(
   AMap: typeof AMap,
-  target: T,
-  props: P,
-  options?: { [string]: string }
+  target: EventTarget,
+  props: *,
+  options?: EventAliasOptions
 ): EventMap {
   return Object.keys(props)
     .filter(x => /^on/.test(x))
     .reduce(folder(AMap, target, props, options || {}), {})
+}
+
+export function removeEvents(AMap: typeof AMap, events: EventMap): {} {
+  function removeEventHandle(key: string): void {
+    AMap.event.removeListener(events[key])
+    delete events[key]
+  }
+
+  Object.keys(events).forEach(removeEventHandle)
+
+  return events
 }
 
 export default bindEvents

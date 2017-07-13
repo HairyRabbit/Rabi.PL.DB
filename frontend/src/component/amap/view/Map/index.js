@@ -5,12 +5,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import loadMap from '../../lib/load-map'
-import bindEvents from '../../lib/bind-events'
+import bindEvents, { removeEvents } from '../../lib/bind-events'
 import mapLocationToPosition from '../../lib/map-location-to-position'
+import InfoWindow from '../InfoWindow'
 import type {
   MapComponent,
   EventMap,
-  MapComponentContext
+  MapComponentContext,
+  LocationCenter
 } from '../../lib/base-interface'
 import style from './style.css'
 
@@ -48,16 +50,15 @@ type Prop = {
   center?: string | $PropertyType<AMap$MapOptions, 'center'>,
   height: number,
   width: number,
-  key?: string,
-  plugins?: Array<string>
+  mapkey?: string,
+  plugins?: Array<string>,
+  disabled: boolean
 } & typeof AMap.MapOptions &
   MapEvent
 
 type State = {
   mount: boolean
 }
-
-type LocationCenter = [number, number] | { position: AMap.LngLat }
 
 class Map extends Component<void, Prop, State> implements MapComponent {
   // Interface
@@ -71,10 +72,6 @@ class Map extends Component<void, Prop, State> implements MapComponent {
   // Component state
   state = {
     mount: false
-  }
-
-  checkInfoWindow() {
-    // TODO
   }
 
   componentWillReceiveProps(nextProps: Prop): void {
@@ -98,15 +95,13 @@ class Map extends Component<void, Prop, State> implements MapComponent {
       }
     }
   }
-
   load(): Promise<void> {
     const { container } = this
     const { center, zoom } = this.props
 
     function setMap(location: ?LocationCenter): void {
-      const loc = !location || Array.isArray(location)
-        ? location
-        : location.position
+      const loc =
+        !location || Array.isArray(location) ? location : location.position
       this.map = new AMap.Map(container, {
         center: loc,
         zoom,
@@ -132,22 +127,15 @@ class Map extends Component<void, Prop, State> implements MapComponent {
       return this.load().then(setMountAndBindEvents.bind(this))
     }
 
-    const { key, plugins } = this.props
+    const { mapkey, plugins } = this.props
 
-    loadMap({ key, plugins }).then(ready.bind(this)).catch(err => {
+    loadMap({ key: mapkey, plugins }).then(ready.bind(this)).catch(err => {
       // Error Handle
       throw err
     })
   }
   componentWillUnmount(): void {
-    const { events } = this
-
-    function removeEventsHandle(key: string): void {
-      AMap.event.removeListener(events[key])
-      delete events[key]
-    }
-
-    Object.keys(events).forEach(removeEventsHandle)
+    this.events = removeEvents(this.AMap, this.events)
     this.map.clearMap()
     this.map.clearInfoWindow()
     this.map.destroy()
@@ -159,19 +147,25 @@ class Map extends Component<void, Prop, State> implements MapComponent {
     }
   }
   render() {
-    const {
-      width,
-      height,
-      children
-    }: {
-      width: $PropertyType<Prop, 'width'>,
-      height: $PropertyType<Prop, 'height'>,
-      children: $PropertyType<Prop, 'children'>
-    } = this.props
+    const { width, height, children } = this.props
 
     const containerStyle: { [string]: string } = {
       ...(width ? { width: width + 'px' } : {}),
       ...(height ? { height: height + 'px' } : {})
+    }
+
+    // Check <InfoWindow /> component number.
+    if (process.env.NODE_ENV === 'development') {
+      if (children && Array.isArray(children)) {
+        const infowindows: Array<React.Element<*>> = children.filter(
+          x => x.type === InfoWindow
+        )
+
+        if (infowindows.length > 1) {
+          console.warn(`[AMap] Find ${infowindows.length} <InfoWindow /> components. \
+Superfluous will be ignored except for the last one.`)
+        }
+      }
     }
 
     return (

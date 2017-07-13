@@ -5,12 +5,13 @@
 import React, { Component, isValidElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import PropTypes from 'prop-types'
-import bindEvents from '../../lib/bind-events'
+import bindEvents, { removeEvents } from '../../lib/bind-events'
 import mapLocationToPosition from '../../lib/map-location-to-position'
 import type {
   MapComponent,
   MapComponentContext,
-  EventMap
+  EventMap,
+  LocationCenter
 } from '../../lib/base-interface'
 
 type InfoWindowEvents = {
@@ -26,22 +27,18 @@ type Prop = {
   InfoWindowEvents
 
 class InfoWindow extends Component<void, Prop, void> implements MapComponent {
-  AMap: typeof AMap
-  map: AMap.Map
-  props: Prop
   events: EventMap = {}
   context: MapComponentContext
   infowindow: AMap.InfoWindow
 
   load(): Promise<void> {
-    const { AMap, map } = this.context
+    const { AMap } = this.context
 
     function setInfoWindow(
       location: ?([number, number] | { position: AMap.LngLat })
     ) {
-      const loc = !location || Array.isArray(location)
-        ? location
-        : location.position
+      const loc =
+        !location || Array.isArray(location) ? location : location.position
       this.infowindow = new AMap.InfoWindow({
         ...this.props,
         position: loc,
@@ -55,14 +52,14 @@ class InfoWindow extends Component<void, Prop, void> implements MapComponent {
   }
 
   componentWillReceiveProps(nextProps: Prop): void {
-    const { map } = this.context
+    const { AMap, map } = this.context
 
     if (nextProps.position && nextProps.position !== this.props.position) {
       if (typeof nextProps.position !== 'string') {
-        this.map.setCenter(nextProps.position)
+        map.setCenter(nextProps.position)
       } else {
         mapLocationToPosition(
-          this.AMap,
+          AMap,
           nextProps.position
         ).then((location: ?LocationCenter) => {
           if (location) {
@@ -88,7 +85,7 @@ class InfoWindow extends Component<void, Prop, void> implements MapComponent {
 
   componentDidMount() {
     const { AMap, map } = this.context
-    const { disabled, position } = this.props
+    const { disabled } = this.props
 
     function ready() {
       if (disabled) {
@@ -102,14 +99,8 @@ class InfoWindow extends Component<void, Prop, void> implements MapComponent {
     this.load().then(ready.bind(this))
   }
   componentWillUnmount() {
-    const { map } = this.context
-    const { infowindow, events } = this
-
-    Object.keys(events).forEach(key => {
-      AMap.event.removeListener(events[key])
-      delete events[key]
-    })
-
+    const { AMap, map } = this.context
+    this.events = removeEvents(AMap, this.events)
     map.clearInfoWindow()
   }
   render() {
@@ -128,7 +119,7 @@ function stringifyContent(content: $PropertyType<Prop, 'children'>): ?string {
   if (process.env.NODE_ENV === 'development') {
     !ctx &&
       console.warn(`<InfoWindow /> \
-Component wan't contents, but got null. Set default content to 'undefined'.`)
+Component contents is 'null'. Set default content to 'undefined'.`)
   }
 
   if (!ctx) {
