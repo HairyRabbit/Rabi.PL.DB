@@ -1,0 +1,16 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+/**
+ * typo.css
+ *
+ * Typography.
+ */
+
+body {
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,"PingFang SC","Microsoft YaHei",SimSun,Arial,sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #666;
+  background-color: #fff;
+}

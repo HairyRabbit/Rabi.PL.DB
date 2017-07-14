@@ -9,7 +9,9 @@
  */
 
 
-html, body {
+html, body,
+.container,
+[data-reactroot] {
   height: 100%;
 }
 
@@ -19,7 +21,7 @@ body {
 }
 
 
-#app {
+:global(#app) {
   display: block;
   height: 100%;
   
