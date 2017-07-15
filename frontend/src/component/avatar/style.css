@@ -1,0 +1,16 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+.container {
+  display: inline-block;
+  size: 88px;
+  border-radius: 50%;
+  background-color: var(--gray30);
+  overflow: hidden;
+}
+
+.image {
+  display: table;
+  max-width: 100%;
+  height: auto;    
+}
