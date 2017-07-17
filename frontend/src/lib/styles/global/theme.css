@@ -1,3 +1,6 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
 :root {
   --gray1: #eee;
   --gray2: #ccc;
@@ -6,4 +9,14 @@
 
   --success: #94D9BB;
   --error: #B25B66;
+
+  --gray10: color(white shade(10%));
+  --gray20: color(white shade(20%));
+  --gray30: color(white shade(30%));
+  --gray40: color(white shade(40%));
+  --gray50: color(white shade(50%));
+  --gray60: color(white shade(60%));
+  --gray70: color(white shade(70%));
+  --gray80: color(white shade(80%));
+  --gray90: color(white shade(90%));
 }

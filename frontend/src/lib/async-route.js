@@ -19,10 +19,10 @@ function AsyncRoute({
   return (
     <Route
       {...props}
-      render={() =>
+      render={props =>
         <Lazy modules={{ Module: component }}>
           {({ Module }) => {
-            return <Module.default />
+            return <Module.default {...props} />
           }}
         </Lazy>}
     />

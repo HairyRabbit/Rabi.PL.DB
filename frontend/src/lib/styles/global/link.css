@@ -1,0 +1,13 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+/**
+ * link.css
+ *
+ * Reset link color and underline.
+ */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

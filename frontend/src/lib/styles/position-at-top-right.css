@@ -1,0 +1,8 @@
+/* -*- mode: css -*- */
+/* -*- coding: utf-8 -*- */
+
+.position-at-top-right {
+  position: absolute;
+  top:    0;
+  right:  0;
+}

@@ -7,9 +7,9 @@
  * Reset app styles.
  */
 
-
 @import "./container.css";
 @import "./typo.css";
+@import "./link.css";
 @import "./navigation.css";
 @import "./form.css";
 @import "./theme.css";
